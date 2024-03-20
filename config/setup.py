@@ -17,7 +17,7 @@ class AppSettings(BaseSettings):
     SUMMARY: str = "An OCR app for Images & PDFs containing Ethiopic Script."
     # TODO add details in description
     DESCRIPTION: str = ""
-    DEBUG_MODE: bool = False
+    DEBUG_MODE: bool = True
 
 
 class ServerSettings(BaseSettings):
@@ -25,6 +25,7 @@ class ServerSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix='SERVER_')
     HOST: str = 'localhost'
     PORT: int = 8000
+    RELOAD: bool = True
 
 
 class DbSettings(BaseSettings):

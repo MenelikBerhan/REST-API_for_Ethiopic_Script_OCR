@@ -2,7 +2,6 @@
 """
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
-import os
 
 # load env variables from .env file
 load_dotenv()

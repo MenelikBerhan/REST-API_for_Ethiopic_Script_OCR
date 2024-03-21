@@ -51,9 +51,9 @@ class ImageCollection(BaseModel):
 
 class ImageRequestBody(BaseModel):
     """
-    Model for Request body of `POST /images/`.
+    An Optional Request body of `POST /images/`.
 
-    All fields are Optional.
+    A dictionary of image properties.
     """
     # set image fields
     name: Union[str, None] = Field(default=None)

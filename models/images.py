@@ -2,8 +2,9 @@
 """Images model
 """
 from models.base_model import APIBaseModel
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List
+import json
 
 
 class ImageModel(APIBaseModel):
@@ -26,6 +27,15 @@ class ImageModel(APIBaseModel):
             }
         },
     )
+
+    # validate data when request is passed as string using Form. Used for
+    # endpoints having File parameters (Content-type: multipart/form-data)
+    @model_validator(mode='before')
+    @classmethod
+    def validate_to_json(cls, value):
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+        return value
 
 
 class ImageCollection(BaseModel):

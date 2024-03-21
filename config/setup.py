@@ -11,7 +11,10 @@ load_dotenv()
 class AppSettings(BaseSettings):
     """For app settings to be set in FastApi."""
     # set prefix to match env variables (APP_TITLE ...)
-    model_config = SettingsConfigDict(env_prefix='APP_')
+    model_config = SettingsConfigDict(
+        env_prefix='APP_',
+        env_ignore_empty=True,
+        )
 
     TITLE: str = "REST-API for Ethiopic Script OCR"
     SUMMARY: str = "An OCR app for Images & PDFs containing Ethiopic Script."
@@ -22,7 +25,10 @@ class AppSettings(BaseSettings):
 
 class ServerSettings(BaseSettings):
     """For uvicorn server settings."""
-    model_config = SettingsConfigDict(env_prefix='SERVER_')
+    model_config = SettingsConfigDict(
+        env_prefix='SERVER_',
+        env_ignore_empty=True,
+        )
     HOST: str = 'localhost'
     PORT: int = 8000
     RELOAD: bool = True
@@ -30,7 +36,7 @@ class ServerSettings(BaseSettings):
 
 class DbSettings(BaseSettings):
     """For mongodb client settings."""
-    # model_config = SettingsConfigDict(env_prefix='DB_')
+    model_config = SettingsConfigDict(env_ignore_empty=True)
     DB_NAME: str = 'test'
     DB_HOST: str = 'localhost'
     DB_PORT: int = 27017

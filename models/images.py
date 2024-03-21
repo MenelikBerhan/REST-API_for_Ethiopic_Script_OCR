@@ -14,6 +14,8 @@ class ImageModel(APIBaseModel):
     # set image fields
     name: str = Field(...)
     dpi: int = Field(default=300, description='Dots per Inch')
+    local_path: str = Field(...)
+
 
     # add config
     model_config = ConfigDict(

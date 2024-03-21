@@ -2,9 +2,10 @@
 '''
 from fastapi import APIRouter
 from db.mongodb import db_client
-from models.images import ImageModel, ImageCollection
-from fastapi import Body, status
-
+from models.images import ImageModel, ImageCollection, ImageRequestBody
+from fastapi import Body, File, HTTPException, status, UploadFile
+from fastapi.encoders import jsonable_encoder
+from typing import Union
 
 # create a router with `/images` prefix
 image_router = APIRouter(prefix='/images')
@@ -32,10 +33,18 @@ async def list_images():
     status_code=status.HTTP_201_CREATED,
     response_model_by_alias=False,
 )
-async def create_image(image: ImageModel = Body(...)):
+# Content-type will be multipart/form-data, image is a stringfied dict which will
+# be converted to dict in `ImageModel` before validation.
+# [Reference](https://stackoverflow.com/questions/65504438/how-to-add-both-file-and-json-body-in-a-fastapi-post-request/70640522#70640522)
+# async def create_image(image: ImageModel = Body(...), file: UploadFile = File(...)):  # using ImageModel as Request Body
+async def create_image(image_input: ImageRequestBody = Body(default=None), file: UploadFile = File(...)):
     """
     Insert a new image record in to the database.   
     """
+    # create an Image using filename from the uploaded file
+    # TODO: if `image_input` is given validate & pass to ImageModel
+    image = ImageModel(name=file.filename)
+
     # don't use any given id, and create a dict for db using alias `_id`.
     # To handle given id, add ObjectId validation and remove `exclude=['id']`
     image_dict = image.model_dump(by_alias=True, exclude=['id'])

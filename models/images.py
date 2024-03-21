@@ -17,12 +17,12 @@ class ImageModel(APIBaseModel):
     # add config
     model_config = ConfigDict(
         json_schema_extra={
-            "example": {
-                "id": "65fb7cc253b139befea1205c",
-                "created_at": "2024-03-21T00:18:10.836000",
-                "updated_at": "2024-03-21T00:18:10.836000",
-                "name": "image.png",
-                "dpi": 300
+            'example': {
+                'id': '65fb7cc253b139befea1205c',
+                'created_at': '2024-03-21T00:18:10.836000',
+                'updated_at': '2024-03-21T00:18:10.836000',
+                'name': 'image.png',
+                'dpi': 300
             }
         },
     )

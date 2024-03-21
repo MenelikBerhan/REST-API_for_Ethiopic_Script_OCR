@@ -3,7 +3,7 @@
 """
 from models.base_model import APIBaseModel
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from typing import List
+from typing import List, Union
 import json
 
 
@@ -30,12 +30,12 @@ class ImageModel(APIBaseModel):
 
     # validate data when request is passed as string using Form. Used for
     # endpoints having File parameters (Content-type: multipart/form-data)
-    @model_validator(mode='before')
-    @classmethod
-    def validate_to_json(cls, value):
-        if isinstance(value, str):
-            return cls(**json.loads(value))
-        return value
+    # @model_validator(mode='before')
+    # @classmethod
+    # def validate_to_json(cls, value):
+    #     if isinstance(value, str):
+    #         return cls(**json.loads(value))
+    #     return value
 
 
 class ImageCollection(BaseModel):
@@ -47,3 +47,34 @@ class ImageCollection(BaseModel):
     """
     # list of images
     images: List[ImageModel]
+
+
+class ImageRequestBody(BaseModel):
+    """
+    Model for Request body of `POST /images/`.
+
+    All fields are Optional.
+    """
+    # set image fields
+    name: Union[str, None] = Field(default=None)
+
+    # add config
+    model_config = ConfigDict(
+        json_schema_extra={
+            'example': {
+                'name': 'image.png',
+            }
+        },
+    )
+
+    # validate data when request is passed as string using Form. Used for
+    # endpoints having File parameters (Content-type: multipart/form-data)
+    @model_validator(mode='before')
+    @classmethod
+    def validate_to_json(cls, value):
+        if value is None or value == '':
+            return {}
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+        
+        return value

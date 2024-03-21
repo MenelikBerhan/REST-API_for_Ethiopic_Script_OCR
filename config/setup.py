@@ -42,7 +42,13 @@ class DbSettings(BaseSettings):
     DB_PORT: int = 27017
 
 
-class Settings(AppSettings, ServerSettings, DbSettings):
+class FileSettings(BaseSettings):
+    """For file reading & writing operations."""
+    model_config = SettingsConfigDict(env_ignore_empty=True)
+    STORAGE_PATH: str = '/tmp/ocr_app/'
+
+
+class Settings(AppSettings, ServerSettings, DbSettings, FileSettings):
     """Container for all settings."""
     pass
 

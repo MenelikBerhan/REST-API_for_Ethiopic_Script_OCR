@@ -41,6 +41,18 @@ async def create_image(image_input: ImageRequestBody = Body(default=None), file:
     """
     Insert a new image record in to the database.   
     """
+    # Temporary: write file to local storage
+    try:
+        contents = await file.read()
+        with open('test22.png', 'wb') as img:
+            img.write(contents)
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            detail=jsonable_encoder(e),
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
     # create an Image using filename from the uploaded file
     # TODO: if `image_input` is given validate & pass to ImageModel
     image = ImageModel(name=file.filename)

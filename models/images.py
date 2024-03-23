@@ -3,7 +3,7 @@
 """
 from models.base_model import APIBaseModel
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from typing import List, Union
+from typing import List, Tuple, Union
 import json
 
 # used to hide properties like `local_path`
@@ -13,8 +13,28 @@ class ImageResponseModel(APIBaseModel):
     """
     name: str = Field(..., description="Uploaded image's filename.")
     description: Union[str, None] = Field(default=None, description='Brief description of the image.')
-    dpi: int = Field(default=300, description='Dots per Inch')
-
+    image_size: Tuple[int, int] = Field(...,
+                                        description='(width, height) of the image in pixles.',
+                                        examples=[(909, 526)]
+                                        )
+    image_format: str = Field(...,
+                              description='Type of image file.',
+                              examples=['PNG', 'JPEG', 'TIFF', 'GIF', 'BMP'])
+    image_mode: str = Field(...,
+                            description='Mode of an image that defines the type and depth of a pixel in the image.',
+                            examples=[
+                                'L (8-bit pixels, grayscale)', 
+                                'P (8-bit pixels, mapped to any other mode using a color palette)',
+                                'RGB (3x8-bit pixels, true color)',
+                                'RGBA (4x8-bit pixels, true color with transparency mask)',
+                                'CMYK (4x8-bit pixels, color separation)'
+                            ])
+    info: dict = Field(...,
+                       description='A dictionary holding data associated with the image.',
+                       examples=[
+                           {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
+                           {'jfif': 257, 'jfif_version': (1, 1), 'jfif_unit': 0, 'jfif_density': (1, 1)},
+                       ])
 
     # add config
     model_config = ConfigDict(
@@ -25,7 +45,10 @@ class ImageResponseModel(APIBaseModel):
                 'updated_at': '2024-03-21T00:18:10.836000',
                 'name': 'image.png',
                 'description': 'Sample page from amharic-amharic dictionary',
-                'dpi': 300,
+                'image_size': (909, 526),
+                'image_format': 'PNG',
+                'image_mode': 'RGB',
+                'info': {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
             }
         },
     )
@@ -47,7 +70,10 @@ class ImageModel(ImageResponseModel):
                 'updated_at': '2024-03-21T00:18:10.836000',
                 'name': 'image.png',
                 'description': 'Sample page from amharic-amharic dictionary',
-                'dpi': 300,
+                'image_size': (909, 526),
+                'image_format': 'PNG',
+                'image_mode': 'RGB',
+                'info': {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
                 'local_path': '/tmp/ocr_app/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.png',
             }
         },

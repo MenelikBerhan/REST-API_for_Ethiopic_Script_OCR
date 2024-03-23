@@ -17,7 +17,8 @@ async def write_file(file: UploadFile) -> str:
         print(f"Created storage directory: '{storage_path}")
 
     # set file name by appending uuid value before the extension
-    name, ext = path.splitext(file.filename)
+    # space in image files replaced by `_`
+    name, ext = path.splitext(file.filename.replace(' ', '_'))
     file_name = f'{name}_{uuid4()}{ext}'
 
     # set absolute local storage path by appending file name to storage path

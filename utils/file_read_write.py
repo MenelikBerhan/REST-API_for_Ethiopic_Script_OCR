@@ -34,13 +34,13 @@ async def write_file(file: UploadFile) -> str:
 
     # get & set image info in return dict
     image_dict = {
-    "name": file.filename,
-    "local_path": file_path,
-    "image_size": image.size,
-    "image_format": image.format,
-    "image_mode": image.mode,
-    "info": image.info
-    }
+        "name": file.filename,
+        "local_path": file_path,
+        "image_size": image.size,
+        "image_format": image.format,
+        "image_mode": image.mode,
+        "info": image.info
+        }
 
     # save image to local storage. then close file pointers to image & uploaded file
     image.save(file_path)

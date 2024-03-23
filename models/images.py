@@ -11,7 +11,7 @@ class ImageResponseModel(APIBaseModel):
     """
     A model class for abstraction of an Image in Response bodies.
     """
-    name: str = Field(..., description='Name of file. If not given the uploaded images filename is used.')
+    name: str = Field(..., description="Uploaded image's filename.")
     description: Union[str, None] = Field(default=None, description='Brief description of the image.')
     dpi: int = Field(default=300, description='Dots per Inch')
 
@@ -72,7 +72,6 @@ class ImageRequestBody(BaseModel):
     A dictionary (`str`:`str`) of image properties. (All fields are optional)
     """
     # image fields to be set from request body
-    name: Union[str, None] = Field(default=None, description='Name of file. If not given the uploaded images filename is used.')
     description: Union[str, None] = Field(default=None, description='Brief description of the image.')
 
     # add config

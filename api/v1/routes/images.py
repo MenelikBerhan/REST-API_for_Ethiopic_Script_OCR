@@ -60,7 +60,8 @@ async def create_image(
     image_dict = {'name': file.filename.replace(' ', '_'), 'local_path': file_path}
 
     # add fields set in request body to image_dict. (fields must be properties of ImageRequestBody)
-    image_dict.update(image_properties.model_dump(exclude_unset=True, exclude_none=True))
+    if image_properties:
+        image_dict.update(image_properties.model_dump(exclude_unset=True, exclude_none=True))
 
     # create an ImageModel using image_dict
     image = ImageModel(**image_dict)

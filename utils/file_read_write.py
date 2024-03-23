@@ -4,6 +4,8 @@ from fastapi import UploadFile
 from uuid import uuid4
 from config.setup import settings
 from os import path, mkdir
+from PIL import Image
+import io
 
 
 async def write_file(file: UploadFile) -> str:
@@ -27,8 +29,22 @@ async def write_file(file: UploadFile) -> str:
     # read file bytes
     file_buffer = await file.read()
 
-    # write file to local storage
-    with open(file_path, 'wb') as local_file:
-        local_file.write(file_buffer)
+    # load image from bytes buffer using Pillow & BytesIO
+    image = Image.open(io.BytesIO(file_buffer))
 
-    return file_path
+    # get & set image info in return dict
+    image_dict = {
+    "name": file.filename,
+    "local_path": file_path,
+    "image_size": image.size,
+    "image_format": image.format,
+    "image_mode": image.mode,
+    "info": image.info
+    }
+
+    # save image to local storage. then close file pointers to image & uploaded file
+    image.save(file_path)
+    image.close()
+    await file.close()
+
+    return image_dict

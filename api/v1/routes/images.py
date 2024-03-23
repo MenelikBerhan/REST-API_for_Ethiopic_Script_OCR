@@ -47,8 +47,9 @@ async def create_image(
     Insert a new image record in to the database.   
     """
     try:
-        # write file to local storage and get absolute path to file
-        file_path = await write_file(file)
+        # write file to local storage and get image dict containing
+        # name, absolute local storage path and other information about the image.
+        image_dict = await write_file(file)
     except Exception as e:
         # if error send internal server error response
         raise HTTPException(
@@ -56,19 +57,16 @@ async def create_image(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    # create dict to instantiate ImageModel. (replace space with _ in filename)
-    image_dict = {'name': file.filename.replace(' ', '_'), 'local_path': file_path}
-
-    # add fields set in request body to image_dict. (fields must be properties of ImageRequestBody)
+    # add fields set in request body to image_dict.
     if image_properties:
         image_dict.update(image_properties.model_dump(exclude_unset=True, exclude_none=True))
 
     # create an ImageModel using image_dict
     image = ImageModel(**image_dict)
 
-    # create a dict for db excluding `id`.
-    # to use given id, set `by_alias=True` & remove exclude `id`
-    # to avoid null (unset) fields use (exclude_unset=True, exclude_none=True)
+    # create a dict for db excluding `id` (if `id` not in image dict default=None).
+    # to use given id (z one in image_dict), set `by_alias=True` & remove exclude `id`.
+    # to avoid saving null (unset) fields in db, use (exclude_unset=True, exclude_none=True)
     new_image_dict = image.model_dump(exclude=['id'])
 
     # insert the new image in db

@@ -78,7 +78,6 @@ class ImageRequestBody(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             'example': {
-                'name': 'image.png',
                 'description': 'Sample page from amharic-amharic dictionary',
             }
         },

@@ -1,5 +1,5 @@
-'''Image endpoints
-'''
+"""Image endpoints
+"""
 from fastapi import APIRouter
 from db.mongodb import db_client
 from models.images import ImageModel, ImageCollection, ImageRequestBody, ImageResponseModel

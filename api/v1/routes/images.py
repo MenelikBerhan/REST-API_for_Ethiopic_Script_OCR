@@ -67,6 +67,7 @@ async def create_image(
 
     # create a dict for db excluding `id`.
     # to use given id, set `by_alias=True` & remove exclude `id`
+    # to avoid null (unset) fields use (exclude_unset=True, exclude_none=True)
     new_image_dict = image.model_dump(exclude=['id'])
 
     # insert the new image in db

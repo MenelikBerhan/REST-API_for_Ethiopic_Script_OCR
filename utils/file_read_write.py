@@ -32,6 +32,11 @@ async def write_file(file: UploadFile) -> str:
     # load image from bytes buffer using Pillow & BytesIO
     image = Image.open(io.BytesIO(file_buffer))
 
+    info = image.info
+
+    # remove unnecessary info that causes errors for large png files
+    info.pop('icc_profile', None)
+
     # get & set image info in return dict
     image_dict = {
         "name": file.filename,
@@ -39,12 +44,12 @@ async def write_file(file: UploadFile) -> str:
         "image_size": image.size,
         "image_format": image.format,
         "image_mode": image.mode,
-        "info": image.info
+        "info": info,
         }
 
     # save image to local storage. then close file pointers to image & uploaded file
     image.save(file_path)
     image.close()
-    await file.close()
+    # await file.close()
 
     return image_dict

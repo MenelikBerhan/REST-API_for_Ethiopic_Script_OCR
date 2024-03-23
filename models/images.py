@@ -6,15 +6,14 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List, Union
 import json
 
-
-class ImageModel(APIBaseModel):
+# used to hide properties like `local_path`
+class ImageResponseModel(APIBaseModel):
     """
-    A model class for abstraction of an Image.
+    A model class for abstraction of an Image in Response bodies.
     """
-    # set image fields
-    name: str = Field(...)
+    name: str = Field(..., description='Name of file. If not given the uploaded images filename is used.')
+    description: Union[str, None] = Field(default=None, description='Brief description of the image.')
     dpi: int = Field(default=300, description='Dots per Inch')
-    local_path: str = Field(...)
 
 
     # add config
@@ -25,7 +24,31 @@ class ImageModel(APIBaseModel):
                 'created_at': '2024-03-21T00:18:10.836000',
                 'updated_at': '2024-03-21T00:18:10.836000',
                 'name': 'image.png',
-                'dpi': 300
+                'description': 'Sample page from amharic-amharic dictionary',
+                'dpi': 300,
+            }
+        },
+    )
+
+
+class ImageModel(ImageResponseModel):
+    """
+    A model class for abstraction of an Image stored in Database.
+    """
+    # fields not in response model (but stored in db)
+    local_path: str = Field(...)
+
+    # add config
+    model_config = ConfigDict(
+        json_schema_extra={
+            'example': {
+                'id': '65fb7cc253b139befea1205c',
+                'created_at': '2024-03-21T00:18:10.836000',
+                'updated_at': '2024-03-21T00:18:10.836000',
+                'name': 'image.png',
+                'description': 'Sample page from amharic-amharic dictionary',
+                'dpi': 300,
+                'local_path': '/tmp/ocr_app/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.png',
             }
         },
     )
@@ -39,23 +62,25 @@ class ImageCollection(BaseModel):
     [vulnerability](https://haacked.com/archive/2009/06/25/json-hijacking.aspx/)
     """
     # list of images
-    images: List[ImageModel]
+    images: List[ImageResponseModel]
 
 
 class ImageRequestBody(BaseModel):
     """
     An Optional Request body of `POST /images/`.
 
-    A dictionary of image properties.
+    A dictionary (`str`:`str`) of image properties. (All fields are optional)
     """
-    # set image fields
-    name: Union[str, None] = Field(default=None)
+    # image fields to be set from request body
+    name: Union[str, None] = Field(default=None, description='Name of file. If not given the uploaded images filename is used.')
+    description: Union[str, None] = Field(default=None, description='Brief description of the image.')
 
     # add config
     model_config = ConfigDict(
         json_schema_extra={
             'example': {
                 'name': 'image.png',
+                'description': 'Sample page from amharic-amharic dictionary',
             }
         },
     )

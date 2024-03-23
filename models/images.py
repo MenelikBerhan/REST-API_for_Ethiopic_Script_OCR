@@ -69,7 +69,7 @@ class ImageRequestBody(BaseModel):
     """
     An Optional Request body of `POST /images/`.
 
-    A dictionary (`str`:`str`) of image properties. (All fields are optional)
+    A serialized dictionary (`str`:`str`) of image properties. (All fields are optional)
     """
     # image fields to be set from request body
     description: Union[str, None] = Field(default=None, description='Brief description of the image.')

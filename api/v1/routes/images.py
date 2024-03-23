@@ -56,8 +56,8 @@ async def create_image(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    # create dict to instantiate ImageModel
-    image_dict = {'name': file.filename, 'local_path': file_path}
+    # create dict to instantiate ImageModel. (replace space with _ in filename)
+    image_dict = {'name': file.filename.replace(' ', '_'), 'local_path': file_path}
 
     # add fields set in request body to image_dict. (fields must be properties of ImageRequestBody)
     image_dict.update(image_properties.model_dump(exclude_unset=True, exclude_none=True))

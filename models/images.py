@@ -6,21 +6,41 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List, Tuple, Union
 import json
 
-# used to hide properties like `local_path`
-class ImageResponseModel(APIBaseModel):
+class ImagePostResponseModel(APIBaseModel):
     """
-    A model class for abstraction of an Image in Response bodies.
+    Abstraction of an Image in Response body for `POST /images`.
     """
     name: str = Field(..., description="Uploaded image's filename.")
     description: Union[str, None] = Field(default=None, description='Brief description of the image.')
-    image_size: Tuple[int, int] = Field(...,
+
+    # add config
+    model_config = ConfigDict(
+        json_schema_extra={
+            'example': {
+                'id': '65fb7cc253b139befea1205c',
+                'created_at': '2024-03-21T00:18:10.836000',
+                'updated_at': '2024-03-21T00:18:10.836000',
+                'name': 'image.png',
+                'description': 'Sample page from amharic-amharic dictionary',
+            }
+        },
+    )
+
+
+# used to hide properties like `local_path` that will be stored in db
+class ImageGetResponseModel(ImagePostResponseModel):
+    """
+    Abstraction of an Image in Response body for `GET /images`.
+    """
+    # fields populated by background process after POST /images
+    image_size: Union[Tuple[int, int], None] = Field(default=None,
                                         description='(width, height) of the image in pixles.',
                                         examples=[(909, 526)]
                                         )
-    image_format: str = Field(...,
+    image_format: Union[str, None] = Field(default=None,
                               description='Type of image file.',
                               examples=['PNG', 'JPEG', 'TIFF', 'GIF', 'BMP'])
-    image_mode: str = Field(...,
+    image_mode: Union[str, None] = Field(default=None,
                             description='Mode of an image that defines the type and depth of a pixel in the image.',
                             examples=[
                                 'L (8-bit pixels, grayscale)', 
@@ -29,7 +49,7 @@ class ImageResponseModel(APIBaseModel):
                                 'RGBA (4x8-bit pixels, true color with transparency mask)',
                                 'CMYK (4x8-bit pixels, color separation)'
                             ])
-    info: dict = Field(...,
+    info: Union[dict, None] = Field(default=None,
                        description='A dictionary holding data associated with the image.',
                        examples=[
                            {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
@@ -54,12 +74,12 @@ class ImageResponseModel(APIBaseModel):
     )
 
 
-class ImageModel(ImageResponseModel):
+class ImageModel(ImageGetResponseModel):
     """
     A model class for abstraction of an Image stored in Database.
     """
     # fields not in response model (but stored in db)
-    local_path: str = Field(...)
+    local_path: Union[str, None] = Field(default=None, description='Local storage path of image.')
 
     # add config
     model_config = ConfigDict(
@@ -82,13 +102,13 @@ class ImageModel(ImageResponseModel):
 
 class ImageCollection(BaseModel):
     """
-    A container holding a list of `Image` instances.
+    A container holding a list of `ImageGetResponseModel` instances.
 
     This exists because providing a top-level array in a JSON response can be a
     [vulnerability](https://haacked.com/archive/2009/06/25/json-hijacking.aspx/)
     """
     # list of images
-    images: List[ImageResponseModel]
+    images: List[ImageGetResponseModel]
 
 
 class ImageRequestBody(BaseModel):

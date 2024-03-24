@@ -3,8 +3,17 @@
 """
 from models.base_model import APIBaseModel
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic.functional_validators import BeforeValidator
 from typing import List, Tuple, Union
+from typing_extensions import Annotated
+from typing import Optional
 import json
+
+
+# Represents an ObjectId field in the database.
+# It will be represented as a `str` on the model and as `ObjectId` in database.
+PyObjectId = Annotated[str, BeforeValidator(str)]
+
 
 class ImagePostResponseModel(APIBaseModel):
     """
@@ -32,6 +41,9 @@ class ImageGetResponseModel(ImagePostResponseModel):
     """
     Abstraction of an Image in Response body for `GET /images`.
     """
+    # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
+    tess_config_id: Optional[PyObjectId] = Field(default=None)
+
     # fields populated by background process after POST /images
     image_size: Union[Tuple[int, int], None] = Field(default=None,
                                         description='(width, height) of the image in pixles.',
@@ -69,6 +81,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
                 'image_format': 'PNG',
                 'image_mode': 'RGB',
                 'info': {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
+                'tess_config_id': '66008f3a64bd72e19e40aa7e',
             }
         },
     )

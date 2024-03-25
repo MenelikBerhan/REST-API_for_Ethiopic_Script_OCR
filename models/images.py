@@ -83,7 +83,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
                 'info': {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
                 'tess_config_id': '66008f3a64bd72e19e40aa7e',
             }
-        },
+        }, # type: ignore
     )
 
 
@@ -109,7 +109,7 @@ class ImageModel(ImageGetResponseModel):
                 'info': {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
                 'local_path': '/tmp/ocr_app/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.png',
             }
-        },
+        }, # type: ignore
     )
 
 

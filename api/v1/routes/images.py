@@ -44,7 +44,7 @@ async def create_image(
     background_tasks: BackgroundTasks,
     image_properties: ImageRequestBody = Body(default=None),
     tesseract_config: TesseractConfigRequestModel = Body(default=None),
-    file: UploadFile = File(...),
+    file: UploadFile = File(..., description='Image (MAX 178956970 pixels)'),
         ):
     """
     Insert a new image record into the database & save image in local storage.

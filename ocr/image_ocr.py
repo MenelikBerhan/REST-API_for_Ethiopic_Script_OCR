@@ -20,7 +20,7 @@ async def background_image_ocr(file_buffer: bytes, file_name: str, id: str, tess
         id (str): id of image in database
         tess_req_dict (dict): tesseract configuration parameters passed in request body
     """
-    await asyncio.sleep(20) 
+    # await asyncio.sleep(20) 
     # get tesseract configuration based on given params
     config_dict = await background_setup_tess_config(tess_req_dict)
     # print('CONFIGURED')

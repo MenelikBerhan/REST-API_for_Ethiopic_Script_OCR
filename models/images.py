@@ -20,7 +20,13 @@ class ImagePostResponseModel(APIBaseModel):
     Abstraction of an Image in Response body for `POST /images`.
     """
     name: str = Field(..., description="Uploaded image's filename.")
-    description: Union[str, None] = Field(default=None, description='Brief description of the image.')
+
+    description: Union[str, None] = Field(
+        default=None, description='Brief description of the image.')
+
+    ocr_finished: bool = Field(
+        default=False,
+        description='True if background task performing OCR is finished.')
 
     # add config
     model_config = ConfigDict(
@@ -43,6 +49,8 @@ class ImageGetResponseModel(ImagePostResponseModel):
     """
     # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
     tess_config_id: Optional[PyObjectId] = Field(default=None)
+
+    ocr_result: Union[str, None] = Field(default=None, description="Result of OCR by tesseract in string form.")
 
     # fields populated by background process after POST /images
     image_size: Union[Tuple[int, int], None] = Field(default=None,

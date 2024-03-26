@@ -2,12 +2,11 @@
 """
 from db.mongodb import db_client
 from fastapi import APIRouter, BackgroundTasks, Body, File, status, UploadFile
-from models.images import ImageModel, ImageCollection, ImageRequestBody, ImagePostResponseModel
-from models.tesseract import TesseractConfigRequestModel, TesseractConfigModel
+from models.images import ImageModel, ImageCollection, ImageRequestBody,\
+    ImagePostResponseModel
+from models.tesseract import TesseractConfigRequestModel
 from os import path
 from ocr.image_ocr import background_image_ocr
-from utils.file_read_write import background_write_file
-from uuid import uuid4
 
 
 # create a router with `/images` prefix
@@ -27,7 +26,7 @@ async def list_images():
 
     The response is unpaginated and limited to 50 results.
     """
-    return ImageCollection(images=await db_client.db['images'].find().to_list(50))
+    return ImageCollection(images=await db_client.db.images.find().to_list(50))
 
 
 # Content-type will be multipart/form-data, `image_properties` is a stringfied
@@ -46,9 +45,9 @@ async def create_image(
     image_properties: ImageRequestBody = Body(default=None),
     tesseract_config: TesseractConfigRequestModel = Body(default=None),
     file: UploadFile = File(...),
-    ):
+        ):
     """
-    Insert a new image record into the database & save image in local storage.   
+    Insert a new image record into the database & save image in local storage.
     """
     # space in image files replaced by `_`
     file_name = file.filename.replace(' ', '_')
@@ -58,14 +57,14 @@ async def create_image(
 
     # add fields set in request body to image_dict.
     if image_properties:
-        image_dict.update(image_properties.model_dump(exclude_unset=True, exclude_none=True))
+        image_dict.update(
+            image_properties.model_dump(exclude_unset=True, exclude_none=True))
 
     # create an ImageModel using image_dict
     image = ImageModel(**image_dict)
 
-    # create a dict for db excluding `id` (if `id` not in image dict default=None).
-    # to use given id (z one in image_dict), set `by_alias=True` & remove exclude `id`.
-    # to avoid saving null (unset) fields in db, use (exclude_unset=True, exclude_none=True)
+    # create a dict for db excluding `id` (default=None). To avoid saving
+    # null (unset) fields in db, use (exclude_unset=True, exclude_none=True)
     new_image_dict = image.model_dump(exclude=['id'])
 
     # insert the new image in db
@@ -77,8 +76,9 @@ async def create_image(
     # get a dictionary of tesseract params from request body
     tess_req_dict = tesseract_config.model_dump()
 
-    # read file
-    file_buffer = await file.read()  # can't pass file directly, it is closed before processing
+    # read file into buffer & pass buffer to background tasks.
+    # can't pass file directly, it is closed before processing.
+    file_buffer = await file.read()
 
     # add a background task to OCR the image
     background_tasks.add_task(

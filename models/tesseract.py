@@ -22,12 +22,17 @@ class TesseractConfigRequestModel(BaseModel):
     A serialized dictionary (`str`:`str`) of tesseract config parameters.
     Refer [TESSERACT(1) Manual Page](https://github.com/tesseract-ocr/tesseract/blob/main/doc/tesseract.1.asc#options)
     """
-    language: Language = Field(default=Language.amharic,
-                               description='Language of text in image.')
-    oem: int = Field(default=1, ge=0, le=3,
-                     description='OCR engine mode used by tesserat.')
-    psm: int = Field(default=3, ge=0, le=13,
-                     description='Page segmentation mode used by tesseract.')
+    language: Language = Field(
+        default=Language.amharic,
+        description='Language of text in image.')
+
+    oem: int = Field(
+        default=1, ge=0, le=3,
+        description='OCR engine mode used by tesserat.')
+
+    psm: int = Field(
+        default=3, ge=0, le=13,
+        description='Page segmentation mode used by tesseract.')
 
     # TODO: add other relevant Tesseract CONFIGVARS here
 
@@ -51,7 +56,7 @@ class TesseractConfigRequestModel(BaseModel):
             return {}
         if isinstance(value, str):
             return cls(**json.loads(value))
-        
+
         return value
 
 

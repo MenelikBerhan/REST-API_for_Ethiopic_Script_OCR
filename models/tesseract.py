@@ -20,7 +20,7 @@ class TesseractConfigRequestModel(BaseModel):
     An Optional Request body of `POST /images/` for tesseract configuration.
 
     A serialized dictionary (`str`:`str`) of tesseract config parameters.
-    Refer [TESSERACT(1) Manual Page](https://github.com/tesseract-ocr/tesseract/blob/main/doc/tesseract.1.asc#options)
+    Refer [TESSERACT(1) Manual Page](https://github.com/tesseract-ocr/tesseract/blob/main/doc/tesseract.1.asc#options)  # noqa
     """
     language: Language = Field(
         default=Language.amharic,

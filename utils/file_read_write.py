@@ -10,9 +10,12 @@ from uuid import uuid4
 import io
 
 
-async def background_write_file(file_buffer: bytes, file_name: str, image_id: str, config_id: str):
-    """Retrieves image metadata from buffer and saves image to local storage.
-    Updates image of id `id` with properties retrieved from metadata & local storage path.
+async def background_write_file(
+        file_buffer: bytes, file_name: str, image_id: str):
+    """
+    Retrieves image metadata from buffer and saves image to local storage.
+    Updates image of id `id` with properties retrieved from metadata & local
+    storage path.
     """
     storage_path = settings.STORAGE_PATH
     # check if storage path exists & is a directory. If not create one.
@@ -37,17 +40,13 @@ async def background_write_file(file_buffer: bytes, file_name: str, image_id: st
 
     # get image metadata and update image in db with it
     image_dict = {
-        "tess_config_id": config_id,
         "local_path": file_path,
         "image_size": image.size,
         "image_format": image.format,
         "image_mode": image.mode,
         "info": info,
-        "updated_at": datetime.now(timezone.utc),
         }
 
-    await db_client.db['images'].update_one({'_id': ObjectId(image_id)}, {'$set': image_dict})
-
-    # save image to local storage. then close file pointer to image 
+    # save image to local storage. then close file pointer to image
     image.save(file_path)
-    image.close()
+    return image, image_dict

@@ -3,7 +3,7 @@
 """
 from models.base_model import APIBaseModel
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Dict
 import json
 from enum import Enum
 
@@ -12,6 +12,7 @@ class Language(str, Enum):
     """Available OCR languages"""
     amharic = 'amh'
     amharic_old = 'amh-old'
+    """Fine tuned amharic model (using old prints)"""
     english = 'eng'
     tigrigna = 'tig'
 
@@ -21,8 +22,12 @@ class TesseractConfigRequestModel(BaseModel):
     An Optional Request body of `POST /images/` for tesseract configuration.
 
     A serialized dictionary (`str`:`str`) of tesseract config parameters.
-    Refer [TESSERACT(1) Manual Page](https://github.com/tesseract-ocr/tesseract/blob/main/doc/tesseract.1.asc#options)  # noqa
-    """
+    
+    Refer [TESSERACT(1) Manual Page](https://github.com/tesseract-ocr/tesseract/blob/main/doc/tesseract.1.asc#options)
+
+    Check [tesseract_parameters](https://github.com/MenelikBerhan/REST-API_for_Ethiopic_Script_OCR/blob/image_ocr/utils/default_tesseract_parameters)
+    file for list of configurable tesseract variables to use for `config_vars`.
+    """  # noqa
     language: Language = Field(
         default=Language.amharic,
         description='Language of text in image.')
@@ -35,7 +40,13 @@ class TesseractConfigRequestModel(BaseModel):
         default=3, ge=0, le=13,
         description='Page segmentation mode used by tesseract.')
 
-    # TODO: add other relevant Tesseract CONFIGVARS here
+    # additional custom configuration flags
+    # TODO: validate key names by cross checking with tesseract_parameters file
+    config_vars: Dict[str, Union[int, float]] = Field(
+        default={},
+        description="`Key: value` pairs of tesseract config variables \
+            (`CONFIGVAR`). Passed to tesseract using `-c`."
+    )
 
     # add config
     model_config = ConfigDict(
@@ -44,6 +55,10 @@ class TesseractConfigRequestModel(BaseModel):
                 'language': 'amh-old',
                 'oem': 1,
                 'psm': 3,
+                'config_vars': {
+                    'load_system_dawg': 0,
+                    'preserve_interword_spaces': 1,
+                    }
             }
         },
     )
@@ -76,6 +91,10 @@ class TesseractConfigModel(APIBaseModel, TesseractConfigRequestModel):
                 'language': 'amh',
                 'oem': 1,
                 'psm': 3,
+                'config_vars': {
+                    'load_system_dawg': 0,
+                    'preserve_interword_spaces': 1,
+                    }
             }
         },
     )

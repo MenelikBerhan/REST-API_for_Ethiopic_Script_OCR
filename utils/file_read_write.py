@@ -7,8 +7,7 @@ from uuid import uuid4
 import io
 
 
-async def background_write_file(
-        file_buffer: bytes, file_name: str, image_id: str):
+async def background_write_file(file_buffer: bytes, file_name: str):
     """
     Retrieves image metadata from buffer and saves image to local storage.
     Updates image of id `id` with properties retrieved from metadata & local
@@ -44,6 +43,6 @@ async def background_write_file(
         "info": info,
         }
 
-    # save image to local storage.
+    # save image to local storage and return image & dict
     image.save(file_path)
     return image, image_dict

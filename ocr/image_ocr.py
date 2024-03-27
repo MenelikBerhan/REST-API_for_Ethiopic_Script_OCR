@@ -14,6 +14,7 @@ import pytesseract as pts
 OCR_IN_PROGRESS: int = 0
 """Keeps track of no. of images being processed"""
 
+
 async def background_image_ocr(
         file_buffer: bytes, file_name: str, id: str, tess_req_dict: dict):
     """Performs OCR on image using background tasks.
@@ -44,7 +45,7 @@ async def background_image_ocr(
     # run tesseract OCR in a custom thread pool. Increase workers if available.
     # (Better efficieny than ProcessPoolExecutor)
     with concurrent.futures.ThreadPoolExecutor(
-        max_workers=settings.OCR_WORKERS) as pool:
+            max_workers=settings.OCR_WORKERS) as pool:
         # before running OCR on a new image, wait for previous one to finish.
         # if added immediately, executor won't return until all images are done
         while OCR_IN_PROGRESS > 0:

@@ -1,9 +1,6 @@
 """Utilities for file reading & writing operations
 """
-from bson import ObjectId
 from config.setup import settings
-from datetime import datetime, timezone
-from db.mongodb import db_client
 from os import path, mkdir
 from PIL import Image
 from uuid import uuid4

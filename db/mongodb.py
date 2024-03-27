@@ -3,7 +3,6 @@
 from config.setup import settings
 from motor.motor_asyncio import AsyncIOMotorClient
 from motor.core import AgnosticClient, AgnosticDatabase
-from typing import Union
 
 
 class DbClient:

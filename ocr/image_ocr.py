@@ -1,15 +1,11 @@
 """Image OCR using pytesseract
 """
 from bson import ObjectId
-from config.setup import settings
 from datetime import datetime, timezone
 from db.mongodb import db_client
 from utils.file_read_write import background_write_file
 from utils.tesseract import background_setup_tess_config,\
     background_run_tesseract
-import asyncio
-import concurrent.futures
-import pytesseract as pts
 
 
 OCR_IN_PROGRESS: int = 0

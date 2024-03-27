@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 """Images model
 """
+from enum import Enum
 from models.base_model import APIBaseModel
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from typing import List, Tuple, Union, Dict
+from typing import Union, Dict
 import json
-from enum import Enum
 
 
 class Language(str, Enum):

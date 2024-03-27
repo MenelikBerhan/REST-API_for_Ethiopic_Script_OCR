@@ -18,7 +18,8 @@ class Language(str, Enum):
 
 
 class TesseractConfigRequestModel(BaseModel):
-    """### An Optional Request body of `POST /images/` for tesseract configuration.
+    """
+    ### An Optional Request body of `POST /images/` for tesseract configuration.
 
     ### A serialized dictionary (`str`:`str`) of tesseract config parameters.
     

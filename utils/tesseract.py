@@ -12,7 +12,7 @@ from PIL import Image
 async def background_setup_tess_config(tess_req_dict: dict) -> dict:
     """
     Based on tesseract configuration parameters passed in request,
-    preapares a TesseractConfigurationModel, and return it as dict.
+    preapares a TesseractConfigurationModel, and returns it as dict.
     """
     # default tesseract CONFIGVARS (to be passed using -c)
     # TODO: move `default_config_vars` to a TesseractSettings class in config
@@ -29,6 +29,7 @@ async def background_setup_tess_config(tess_req_dict: dict) -> dict:
          if k not in tess_req_dict['config_vars']})
 
     # check if a TesseractConfigModel already exist in db for given params
+    # TODO: handle how config_vars in tess_req_dict are used for search in db
     config_dict = await db_client.db.tess_config.find_one(tess_req_dict)
 
     # if no TesseractConfigModel exist in db, create one
@@ -83,12 +84,18 @@ async def background_run_tesseract(image: Image, config_dict: dict):
 
         OCR_IN_PROGRESS = OCR_IN_PROGRESS + 1
 
-        # await and get ocr result
-        ocr_result = await loop.run_in_executor(
-            pool, lambda: pts.image_to_string(image, config=config))
+        ocr_result_dict = await loop.run_in_executor(
+            pool,
+            lambda: pts.image_to_data(
+                image, config=config, output_type=pts.Output.DICT
+                )
+            )
 
         image.close()   # as precaution (side effect not clear if not closed)
 
         OCR_IN_PROGRESS = OCR_IN_PROGRESS - 1
 
-    return ocr_result
+        # TODO: extract text from dict in a separate function
+        ocr_result_text = " ".join(ocr_result_dict['text'])
+
+    return ocr_result_dict, ocr_result_text

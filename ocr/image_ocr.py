@@ -8,10 +8,6 @@ from utils.tesseract import background_setup_tess_config,\
     background_run_tesseract
 
 
-OCR_IN_PROGRESS: int = 0
-"""Keeps track of no. of images being processed"""
-
-
 async def background_image_ocr(
         file_buffer: bytes, file_name: str, id: str, tess_req_dict: dict):
     """Performs OCR on image using background tasks.
@@ -23,9 +19,6 @@ async def background_image_ocr(
         tess_req_dict (dict): tesseract configuration parameters passed
             in request body
     """
-    # set as global (otherwise UnboundLocalError: referenced before assignment)
-    global OCR_IN_PROGRESS
-
     # get tesseract configuration based on given params in request
     config_dict = await background_setup_tess_config(tess_req_dict)
     print('Tesseract: CONFIGURED')
@@ -34,13 +27,16 @@ async def background_image_ocr(
     image, image_dict = await background_write_file(file_buffer, file_name)
     print('Image: WRITTEN 2 LOCAL')
 
-    ocr_result = await background_run_tesseract(image, config_dict)
+    # run tesseract in background & get result in string & dictionary formats
+    ocr_result_dict, ocr_result_text = await background_run_tesseract(
+        image, config_dict)
     print('Tesseract: OCR FINISHED')
 
     # update image in db
     image_dict.update({
         'ocr_finished': True,
-        'ocr_result': ocr_result,
+        'ocr_result_text': ocr_result_text,
+        'ocr_result_dict': ocr_result_dict,
         "tess_config_id": config_dict['id'],
         "updated_at": datetime.now(timezone.utc)})
 

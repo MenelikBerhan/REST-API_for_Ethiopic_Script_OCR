@@ -5,7 +5,6 @@ from fastapi import APIRouter, BackgroundTasks, Body, File, status, UploadFile
 from models.images import ImageModel, ImageCollection, ImageRequestBody,\
     ImagePostResponseModel
 from models.tesseract import TesseractConfigRequestModel
-from os import path
 from ocr.image_ocr import background_image_ocr
 
 
@@ -79,6 +78,9 @@ async def create_image(
     # read file into buffer & pass buffer to background tasks.
     # can't pass file directly, it is closed before processing.
     file_buffer = await file.read()
+
+    # as a precaution close file. (FastApi closes it after sending response)
+    file.close()
 
     # add a background task to OCR the image
     background_tasks.add_task(

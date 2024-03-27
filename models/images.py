@@ -38,6 +38,7 @@ class ImagePostResponseModel(APIBaseModel):
                 'updated_at': '2024-03-21T00:18:10.836000',
                 'name': 'image.png',
                 'description': 'Sample page from amharic-amharic dictionary',
+                'ocr_finished': False
             }
         },
     )
@@ -52,7 +53,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
     tess_config_id: Optional[PyObjectId] = Field(default=None)
 
     # fields populated by background process after POST /images
-    ocr_result: Union[str, None] = Field(
+    ocr_result_text: Union[str, None] = Field(
         default=None,
         description="Result of OCR by tesseract in string form.")
 
@@ -77,8 +78,40 @@ class ImageGetResponseModel(ImagePostResponseModel):
             'RGBA (4x8-bit pixels, true color with transparency mask)',
             'CMYK (4x8-bit pixels, color separation)'])
 
+    # add config
+    model_config = ConfigDict(
+        json_schema_extra={
+            'example': {
+                'id': '65fb7cc253b139befea1205c',
+                'created_at': '2024-03-21T00:18:10.836000',
+                'updated_at': '2024-03-21T00:18:10.836000',
+                'name': 'image.png',
+                'description': 'Sample page from amharic-amharic dictionary',
+                'image_size': (909, 526),
+                'image_format': 'PNG',
+                'image_mode': 'RGB',
+                'tess_config_id': '66008f3a64bd72e19e40aa7e',
+                'ocr_finished': True,
+                'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
+            }
+        },  # type: ignore
+    )
+
+
+class ImageModel(ImageGetResponseModel):
+    """
+    A model class for abstraction of an Image stored in Database.
+    """
+    # fields not in response model (but stored in db)
+    local_path: Union[str, None] = Field(
+        default=None, description='Local storage path of image.')
+
+    ocr_result_dict: Union[dict, None] = Field(
+        default=None,
+        description="Detailed result of OCR by tesseract in a dictionay form.")
+
     info: Union[dict, None] = Field(
-        default=None,   # exclude=True,
+        default=None,
         description='A dictionary holding data associated with the image.',
         examples=[
             {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
@@ -97,37 +130,18 @@ class ImageGetResponseModel(ImagePostResponseModel):
                 'image_size': (909, 526),
                 'image_format': 'PNG',
                 'image_mode': 'RGB',
-                'info': {'srgb': 0, 'gamma': 0.45455,
-                         'dpi': (95.9866, 95.9866)},
-                'tess_config_id': '66008f3a64bd72e19e40aa7e',
-            }
-        },  # type: ignore
-    )
-
-
-class ImageModel(ImageGetResponseModel):
-    """
-    A model class for abstraction of an Image stored in Database.
-    """
-    # fields not in response model (but stored in db)
-    local_path: Union[str, None] = Field(
-        default=None, description='Local storage path of image.')
-
-    # add config
-    model_config = ConfigDict(
-        json_schema_extra={
-            'example': {
-                'id': '65fb7cc253b139befea1205c',
-                'created_at': '2024-03-21T00:18:10.836000',
-                'updated_at': '2024-03-21T00:18:10.836000',
-                'name': 'image.png',
-                'description': 'Sample page from amharic-amharic dictionary',
-                'image_size': (909, 526),
-                'image_format': 'PNG',
-                'image_mode': 'RGB',
                 'info': {'srgb': 0, 'gamma': 0.45455, 'dpi': (96, 96)},
                 'local_path':
                     '/ocr/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.png',
+                'tess_config_id': '66008f3a64bd72e19e40aa7e',
+                'ocr_finished': True,
+                'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
+                'ocr_result_dict': {
+                    'level': [1, 2], 'page_num': [1, 1], 'block_num': [0, 1],
+                    'par_num': [0, 0], 'line_num': [0, 1], 'word_num': [0, 1],
+                    'left': [0, 254], 'top': [0, 29], 'width': [644, 65],
+                    'height':  [56, 17], 'conf': [-1, 92], 'text': ['', 'ምንሊክ']
+                }
             }
         },  # type: ignore
     )

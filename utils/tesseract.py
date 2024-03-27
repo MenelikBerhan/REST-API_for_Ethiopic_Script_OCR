@@ -64,10 +64,6 @@ async def background_run_tesseract(image: Image, config_dict: dict):
     # set tesseract config string from config_dict
     config = """
     -l {} --psm {} --oem {}
-    -c load_system_dawg=0
-    -c load_freq_dawg=0
-    -c textord_space_size_is_variable=1
-    -c preserve_interword_spaces=1
     """.format(config_dict['language'], config_dict['psm'], config_dict['oem'])
 
     for key, value in config_dict['config_vars'].items():

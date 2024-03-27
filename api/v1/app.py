@@ -8,10 +8,10 @@ import uvicorn
 
 # create fastapi app
 app = FastAPI(
-    debug=settings.DEBUG_MODE,
-    title=settings.TITLE,
-    summary=settings.SUMMARY,
-    description=settings.DESCRIPTION
+    debug=settings.APP_DEBUG_MODE,
+    title=settings.APP_TITLE,
+    summary=settings.APP_SUMMARY,
+    description=settings.APP_DESCRIPTION
     )
 
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     # start uvicorn server
     uvicorn.run(
         'api.v1.app:app',
-        host=settings.HOST,
-        reload=settings.RELOAD,
-        port=settings.PORT,
+        host=settings.SERVER_HOST,
+        reload=settings.SERVER_RELOAD,
+        port=settings.SERVER_PORT,
     )

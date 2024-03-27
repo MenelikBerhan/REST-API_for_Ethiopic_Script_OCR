@@ -80,7 +80,7 @@ async def create_image(
     file_buffer = await file.read()
 
     # as a precaution close file. (FastApi closes it after sending response)
-    file.close()
+    await file.close()
 
     # add a background task to OCR the image
     background_tasks.add_task(

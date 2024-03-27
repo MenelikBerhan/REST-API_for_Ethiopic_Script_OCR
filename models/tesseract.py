@@ -11,6 +11,7 @@ from enum import Enum
 class Language(str, Enum):
     """Available OCR languages"""
     amharic = 'amh'
+    amharic_old = 'amh-old'
     english = 'eng'
     tigrigna = 'tig'
 
@@ -40,7 +41,7 @@ class TesseractConfigRequestModel(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             'example': {
-                'language': 'amh',
+                'language': 'amh-old',
                 'oem': 1,
                 'psm': 3,
             }

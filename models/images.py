@@ -17,7 +17,7 @@ PyObjectId = Annotated[str, BeforeValidator(str)]
 
 class ImagePostResponseModel(APIBaseModel):
     """
-    Abstraction of an Image in Response body for `POST /images`.
+    ### Abstraction of an Image in Response body for `POST /images`.
     """
     name: str = Field(..., description="Uploaded image's filename.")
 
@@ -46,7 +46,7 @@ class ImagePostResponseModel(APIBaseModel):
 # used to hide properties like `local_path` that will be stored in db
 class ImageGetResponseModel(ImagePostResponseModel):
     """
-    Abstraction of an Image in Response body for `GET /images`.
+    ### Abstraction of an Image in Response body for `GET /images`.
     """
     # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
     tess_config_id: Optional[PyObjectId] = Field(default=None)
@@ -135,20 +135,20 @@ class ImageModel(ImageGetResponseModel):
 
 class ImageCollection(BaseModel):
     """
-    A container holding a list of `ImageGetResponseModel` instances.
+    ### A container holding a list of `ImageGetResponseModel` instances.
 
-    This exists because providing a top-level array in a JSON response can be a
-    [vulnerability](https://haacked.com/archive/2009/06/25/json-hijacking.aspx)
-    """
+    ### This exists because providing a top-level array in a JSON response\
+    can be a [vulnerability](https://haacked.com/archive/2009/06/25/json-hijacking.aspx)
+    """  # noqa
     # list of images
     images: List[ImageGetResponseModel]
 
 
 class ImageRequestBody(BaseModel):
     """
-    An Optional Request body of `POST /images/`.
+    ### An Optional Request body of `POST /images/`.
 
-    A serialized dictionary (`str`:`str`) of image properties.
+    ### A serialized dictionary (`str`:`str`) of image properties.\
     (All fields are optional)
     """
     # image fields to be set from request body

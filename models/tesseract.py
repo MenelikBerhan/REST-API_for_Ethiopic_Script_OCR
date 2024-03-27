@@ -18,18 +18,17 @@ class Language(str, Enum):
 
 
 class TesseractConfigRequestModel(BaseModel):
-    """
-    An Optional Request body of `POST /images/` for tesseract configuration.
+    """### An Optional Request body of `POST /images/` for tesseract configuration.
 
-    A serialized dictionary (`str`:`str`) of tesseract config parameters.
+    ### A serialized dictionary (`str`:`str`) of tesseract config parameters.
     
-    Refer [TESSERACT(1) Manual Page](https://github.com/tesseract-ocr/tesseract/blob/main/doc/tesseract.1.asc#options)
+    ### Refer [TESSERACT(1) Manual Page](https://github.com/tesseract-ocr/tesseract/blob/main/doc/tesseract.1.asc#options)
 
-    Check [tesseract_parameters](https://github.com/MenelikBerhan/REST-API_for_Ethiopic_Script_OCR/blob/image_ocr/utils/default_tesseract_parameters)
+    ### Check [tesseract_parameters](https://github.com/MenelikBerhan/REST-API_for_Ethiopic_Script_OCR/blob/image_ocr/utils/default_tesseract_parameters)\
     file for list of configurable tesseract variables to use for `config_vars`.
     """  # noqa
     language: Language = Field(
-        default=Language.amharic,
+        default=Language.amharic_old,
         description='Language of text in image.')
 
     oem: int = Field(

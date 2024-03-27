@@ -26,4 +26,5 @@ class DbClient:
         print("Closing connection to mongodb database")
         self.client.close()
 
+
 db_client = DbClient()

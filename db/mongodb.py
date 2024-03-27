@@ -2,6 +2,8 @@
 """
 from config.setup import settings
 from motor.motor_asyncio import AsyncIOMotorClient
+from motor.core import AgnosticClient, AgnosticDatabase
+from typing import Union
 
 
 class DbClient:
@@ -9,6 +11,8 @@ class DbClient:
     def __init__(self):
         """Initialize instance"""
         self.url = f'mongodb://{settings.DB_HOST}:{settings.DB_PORT}'
+        self.client: AgnosticClient
+        self.db: AgnosticDatabase
 
     async def connect(self):
         """Establishes mongodb connection on app startup."""

@@ -47,6 +47,6 @@ async def background_write_file(
         "info": info,
         }
 
-    # save image to local storage. then close file pointer to image
+    # save image to local storage.
     image.save(file_path)
     return image, image_dict

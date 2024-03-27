@@ -1,6 +1,7 @@
 """Image OCR using pytesseract
 """
 from bson import ObjectId
+from config.setup import settings
 from datetime import datetime, timezone
 from db.mongodb import db_client
 from utils.file_read_write import background_write_file
@@ -10,13 +11,8 @@ import concurrent.futures
 import pytesseract as pts
 
 
-def ocr_image(image):
-    """
-    Synchronous OCR by tesseract, used in custom process pool.
-    Needs to be global to use process pool.
-    """
-    return pts.image_to_string(image, lang='amh-old')
-
+OCR_IN_PROGRESS: int = 0
+"""Keeps track of no. of images being processed"""
 
 async def background_image_ocr(
         file_buffer: bytes, file_name: str, id: str, tess_req_dict: dict):
@@ -29,6 +25,9 @@ async def background_image_ocr(
         tess_req_dict (dict): tesseract configuration parameters passed
             in request body
     """
+    # set as global (otherwise UnboundLocalError: referenced before assignment)
+    global OCR_IN_PROGRESS
+
     # get tesseract configuration based on given params in request
     config_dict = await background_setup_tess_config(tess_req_dict)
     print('Tesseract: CONFIGURED')
@@ -41,31 +40,26 @@ async def background_image_ocr(
     # [REFERENCE](https://docs.python.org/3.8/library/asyncio-eventloop.html#asyncio.loop.run_in_executor)  # noqa
     # get the running event loop in the current OS thread
     loop = asyncio.get_running_loop()
-    tasks_before = asyncio.all_tasks()
-    while len(tasks_before) > 3:
-        await asyncio.sleep(5)
-        tasks_before = asyncio.all_tasks()
 
-    # print(f'BEFORE: {len(tasks_before)} tasks: {[(t.get_name()) for t in tasks_before]}') # noqa
+    # run tesseract OCR in a custom thread pool. Increase workers if available.
+    # (Better efficieny than ProcessPoolExecutor)
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=settings.OCR_WORKERS) as pool:
+        # before running OCR on a new image, wait for previous one to finish.
+        # if added immediately, executor won't return until all images are done
+        while OCR_IN_PROGRESS > 0:
+            await asyncio.sleep(2)  # TODO: check d/t sleep durations effect
 
-    # # 1. Run tesseract OCR in the default loop's executor
-    # ocr_result = await loop.run_in_executor(
-    #     None, lambda: pts.image_to_string(image, lang='amh-old'))
+        OCR_IN_PROGRESS = OCR_IN_PROGRESS + 1
 
-    # # 2. Run tesseract OCR in a custom thread pool:
-    # with concurrent.futures.ThreadPoolExecutor() as pool:
-    #     ocr_result = await loop.run_in_executor(
-    #         pool, lambda: pts.image_to_string(image, lang='amh-old'))
-    #     print(ocr_result)
-
-    # 3. Run in a custom process pool:
-    with concurrent.futures.ProcessPoolExecutor() as pool:
+        # await and get ocr result
         ocr_result = await loop.run_in_executor(
-            pool, ocr_image, image)
-        print('Tesseract: OCR FINISHED')
+            pool, lambda: pts.image_to_string(image, lang='amh-old'))
 
-    # tasks_after = asyncio.all_tasks()
-    # print(f'AFTER: {len(tasks_after)} tasks: {[(t.get_name()) for t in tasks_after]}') # noqa
+        image.close()   # as precaution (side effect not clear if not closed)
+
+        OCR_IN_PROGRESS = OCR_IN_PROGRESS - 1
+        print('Tesseract: OCR FINISHED')
 
     # update image in db
     image_dict.update({

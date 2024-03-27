@@ -5,7 +5,8 @@ from config.setup import settings
 from datetime import datetime, timezone
 from db.mongodb import db_client
 from utils.file_read_write import background_write_file
-from utils.tesseract_config import background_setup_tess_config
+from utils.tesseract import background_setup_tess_config,\
+    background_run_tesseract
 import asyncio
 import concurrent.futures
 import pytesseract as pts
@@ -34,33 +35,11 @@ async def background_image_ocr(
     print('Tesseract: CONFIGURED')
 
     # save image in local storage & get image_dict (metadata & storage path)
-    image, image_dict = await background_write_file(
-        file_buffer, file_name, id)
+    image, image_dict = await background_write_file(file_buffer, file_name)
     print('Image: WRITTEN 2 LOCAL')
 
-    # [REFERENCE](https://docs.python.org/3.8/library/asyncio-eventloop.html#asyncio.loop.run_in_executor)  # noqa
-    # get the running event loop in the current OS thread
-    loop = asyncio.get_running_loop()
-
-    # run tesseract OCR in a custom thread pool. Increase workers if available.
-    # (Better efficieny than ProcessPoolExecutor)
-    with concurrent.futures.ThreadPoolExecutor(
-            max_workers=settings.OCR_WORKERS) as pool:
-        # before running OCR on a new image, wait for previous one to finish.
-        # if added immediately, executor won't return until all images are done
-        while OCR_IN_PROGRESS > 0:
-            await asyncio.sleep(2)  # TODO: check d/t sleep durations effect
-
-        OCR_IN_PROGRESS = OCR_IN_PROGRESS + 1
-
-        # await and get ocr result
-        ocr_result = await loop.run_in_executor(
-            pool, lambda: pts.image_to_string(image, lang='amh-old'))
-
-        image.close()   # as precaution (side effect not clear if not closed)
-
-        OCR_IN_PROGRESS = OCR_IN_PROGRESS - 1
-        print('Tesseract: OCR FINISHED')
+    ocr_result = await background_run_tesseract(image, config_dict)
+    print('Tesseract: OCR FINISHED')
 
     # update image in db
     image_dict.update({

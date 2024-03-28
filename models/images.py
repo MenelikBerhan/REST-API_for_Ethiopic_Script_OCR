@@ -19,15 +19,15 @@ class ImagePostResponseModel(APIBaseModel):
     """
     ### Abstraction of an Image in Response body for `POST /images`.
     """
-    name: str = Field(..., description="Uploaded image's filename.")
+    name: str = Field(..., description="__Uploaded image's filename.__")
 
     description: Union[str, None] = Field(
         default=None,
-        description='Brief description of the image.')
+        description='__Brief description of the image.__')
 
     ocr_finished: bool = Field(
         default=False,
-        description='True if background task performing OCR is finished.')
+        description='__True if background task performing OCR is finished.__')
 
     # add config
     model_config = ConfigDict(
@@ -50,27 +50,29 @@ class ImageGetResponseModel(ImagePostResponseModel):
     ### Abstraction of an Image in Response body for `GET /images`.
     """
     # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
-    tess_config_id: Optional[PyObjectId] = Field(default=None)
+    tess_config_id: Optional[PyObjectId] = Field(
+        default=None,
+        description='__Id of tesseract configuration used for OCR.__')
 
     # fields populated by background process after POST /images
     ocr_result_text: Union[str, None] = Field(
         default=None,
-        description="Result of OCR by tesseract in string form.")
+        description="__Result of OCR by tesseract in string form.__")
 
     image_size: Union[Tuple[int, int], None] = Field(
         default=None,
-        description='(width, height) of the image in pixles.',
+        description='__`(width, height)` of the image in pixles.__',
         examples=[(909, 526)])
 
     image_format: Union[str, None] = Field(
         default=None,
-        description='Type of image file.',
+        description='__Type of image file.__',
         examples=['PNG', 'JPEG', 'TIFF', 'GIF', 'BMP'])
 
     image_mode: Union[str, None] = Field(
         default=None,
-        description="""Mode of an image that defines the type and
-            depth of a pixel in the image.""",
+        description='__Mode of an image that defines the type and\
+            depth of a pixel in the image.__',
         examples=[
             'L (8-bit pixels, grayscale)',
             'P (8-bit pixels, mapped to any other mode using a color palette)',
@@ -100,19 +102,20 @@ class ImageGetResponseModel(ImagePostResponseModel):
 
 class ImageModel(ImageGetResponseModel):
     """
-    A model class for abstraction of an Image stored in Database.
+    ### A model class for abstraction of an Image stored in Database.
     """
     # fields not in response model (but stored in db)
     local_path: Union[str, None] = Field(
-        default=None, description='Local storage path of image.')
+        default=None, description='__Local storage path of image.__')
 
     ocr_result_dict: Union[dict, None] = Field(
         default=None,
-        description="Detailed result of OCR by tesseract in a dictionay form.")
+        description='__Detailed result of OCR by tesseract\
+        in a dictionay form.__')
 
     info: Union[dict, None] = Field(
         default=None,
-        description='A dictionary holding data associated with the image.',
+        description='__A dictionary holding data associated with the image.__',
         examples=[
             {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
             {'jfif': 257, 'jfif_version': (1, 1), 'jfif_unit': 0,
@@ -167,7 +170,7 @@ class ImageRequestBody(BaseModel):
     """
     # image fields to be set from request body
     description: Union[str, None] = Field(
-        default=None, description='Brief description of the image.')
+        default=None, description='__Brief description of the image.__')
 
     # add config
     model_config = ConfigDict(

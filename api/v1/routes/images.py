@@ -14,16 +14,16 @@ image_router = APIRouter(prefix='/images')
 
 @image_router.get(
     '/',
-    response_description='List all images',
+    response_description='__List of all images__',
     response_model=ImageCollection,
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
 async def list_images():
     """
-    List all of the images in the database.
+    ### List all of the images in the database.
 
-    The response is unpaginated and limited to 50 results.
+    ### The response is unpaginated and limited to 50 results.
     """
     return ImageCollection(images=await db_client.db.images.find().to_list(50))
 
@@ -33,7 +33,7 @@ async def list_images():
 # [Reference](https://stackoverflow.com/questions/65504438/how-to-add-both-file-and-json-body-in-a-fastapi-post-request/70640522#70640522)
 @image_router.post(
     '/',
-    response_description='Add new image',
+    response_description='__Created image__',
     response_model=ImagePostResponseModel,
     status_code=status.HTTP_201_CREATED,
     response_model_by_alias=False,
@@ -43,10 +43,11 @@ async def create_image(
     background_tasks: BackgroundTasks,
     image_properties: ImageRequestBody = Body(default=None),
     tesseract_config: TesseractConfigRequestModel = Body(default=None),
-    file: UploadFile = File(..., description='Image (MAX 178956970 pixels)'),
-        ):
+    file: UploadFile = File(...,
+                            description='__Image (MAX 178956970 pixels)__')):
     """
-    Insert a new image record into the database & save image in local storage.
+    ### Insert a new image record into the database, save image in local\
+    storage and perform OCR in the background.
     """
     # space in image files replaced by `_`
     file_name = file.filename.replace(' ', '_')

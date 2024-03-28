@@ -28,6 +28,11 @@ async def background_setup_tess_config(tess_req_dict: dict) -> dict:
         {k: v for k, v in default_config_vars.items()
          if k not in tess_req_dict['config_vars']})
 
+    # sort items in the nested dictionary `config_vars` since mongodb uses
+    # field order in nested documents (dicts) for equalit matches
+    tess_req_dict['config_vars'] = dict(
+        sorted(tess_req_dict['config_vars'].items()))
+
     # check if a TesseractConfigModel already exist in db for given params
     # TODO: handle how config_vars in tess_req_dict are used for search in db
     config_dict = await db_client.db.tess_config.find_one(tess_req_dict)

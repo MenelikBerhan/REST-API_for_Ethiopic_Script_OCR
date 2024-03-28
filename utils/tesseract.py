@@ -67,9 +67,8 @@ async def background_run_tesseract(image: Image, config_dict: dict):
     global OCR_IN_PROGRESS
 
     # set tesseract config string from config_dict
-    config = """
-    -l {} --psm {} --oem {}
-    """.format(config_dict['language'], config_dict['psm'], config_dict['oem'])
+    config = '-l {} --psm {} --oem {}'.format(
+        config_dict['language'], config_dict['psm'], config_dict['oem'])
 
     for key, value in config_dict['config_vars'].items():
         config += ' -c {}={}'.format(key, value)

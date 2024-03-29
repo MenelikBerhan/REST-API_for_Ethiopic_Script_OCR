@@ -30,7 +30,7 @@ async def background_image_ocr(
 
     # run tesseract in background & get output model dict & result text
     tess_output_dict, ocr_result_text = await background_run_tesseract(
-        image, image_id ,tess_config_dict)
+        image, image_id, tess_config_dict)
     print('Tesseract: OCR FINISHED')
 
     # update image in db

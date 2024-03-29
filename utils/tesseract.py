@@ -58,7 +58,8 @@ OCR_IN_PROGRESS: int = 0
 """Keeps track of no. of images being processed"""
 
 
-async def background_run_tesseract(image: Image, image_id: str, tess_config_dict: dict):
+async def background_run_tesseract(
+        image: Image, image_id: str, tess_config_dict: dict):
     """Runs tesseract in a ThreadPool and returns the result.
 
     Args:
@@ -112,7 +113,7 @@ async def background_run_tesseract(image: Image, image_id: str, tess_config_dict
         # TODO: extract text from dict in a separate function
         ocr_result_text = " ".join(ocr_result_dict['text'])
 
-    # create a TesseractOutputModel for this image OCR    
+    # create a TesseractOutputModel for this image OCR
     tess_output_dict = {
         'image_id': image_id,
         'tess_config_id': tess_config_dict['id'],
@@ -122,7 +123,7 @@ async def background_run_tesseract(image: Image, image_id: str, tess_config_dict
 
     tess_output = TesseractOutputModel(**tess_output_dict)
 
-    # save output in db
+    # save output model in db
     tess_output_dict = tess_output.model_dump(exclude={'id'})
     insert_result = await db_client.db.tess_output.insert_one(tess_output_dict)
 

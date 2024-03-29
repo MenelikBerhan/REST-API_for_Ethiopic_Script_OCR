@@ -4,8 +4,14 @@
 from enum import Enum
 from models.base_model import APIBaseModel
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from typing import Union, Dict
+from pydantic.functional_validators import BeforeValidator
+from typing import Dict, List, Union
+from typing_extensions import Annotated
 import json
+
+# Represents an ObjectId field in the database.
+# It will be represented as a `str` on the model and as `ObjectId` in database.
+PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
 # TODO: use Field for fields & add field desctiptions
@@ -16,6 +22,12 @@ class Language(str, Enum):
     """Fine tuned amharic model (using old prints)"""
     english = 'eng'
     tigrigna = 'tig'
+
+
+class ImagePreprocessing(str, Enum):
+    """### Type of image preprocessing used."""
+    simple = 'simple'
+    detailed = 'detailed'
 
 
 class TesseractConfigRequestModel(BaseModel):
@@ -100,4 +112,65 @@ class TesseractConfigModel(APIBaseModel, TesseractConfigRequestModel):
                     }
             }
         },
+    )
+
+
+class TesseractOutputModel(APIBaseModel):
+    """
+    Model class for abstraction of image's tesseract OCR result.
+    """
+    image_id: PyObjectId = Field(
+        ...,
+        description="Images id."
+    )
+
+    tess_config_id: PyObjectId = Field(
+        ...,
+        description='Tesseract configuration id.'
+    )
+
+    image_preprocessing: ImagePreprocessing = Field(
+        default=ImagePreprocessing.simple,
+        description='Type of image preprocessing used.'
+    )
+
+    time_taken: float = Field(
+        None,
+        description='Time taken to OCR the image.'
+    )
+
+    ocr_result_dict: Dict[str, Union[List[int], List[str]]] = Field(
+        ...,
+        description="""A dictionary containing detailed OCR result.
+        Contains information about recognized words location in the input
+        image and the confidence they are recognized with.
+        [`level`, `page_num`, `block_num`, `par_num`, `line_num`, `word_num`,
+        `left`, `top`,  `width`, `height`, `conf` and `text`]."""
+    )
+
+    ocr_accuracy: Union[float, None] = Field(
+        default=None,
+        description='Average confidence level of words recognized.'
+    )
+
+    # add config
+    model_config = ConfigDict(
+        json_schema_extra={
+            'example': {
+                'id': '65fb7cc253b139befea1205c',
+                'created_at': '2024-03-21T00:18:10.836000',
+                'updated_at': '2024-03-21T00:18:10.836000',
+                'image_id': '65fb7cc253b139befea1205c',
+                'tess_config_id': '66008f3a64bd72e19e40aa7e',
+                'image_preprocessing': 'simple',
+                'time_taken': 0.940872102000867,
+                'ocr_accuracy': 87.8,
+                'ocr_result_dict': {
+                    'level': [1, 2], 'page_num': [1, 1], 'block_num': [0, 1],
+                    'par_num': [0, 0], 'line_num': [0, 1], 'word_num': [0, 1],
+                    'left': [0, 254], 'top': [0, 29], 'width': [644, 65],
+                    'height':  [56, 17], 'conf': [-1, 92], 'text': ['', 'ምንሊክ']
+                }
+            }
+        },  # type: ignore
     )

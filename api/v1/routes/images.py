@@ -2,7 +2,7 @@
 """
 from db.mongodb import db_client
 from fastapi import APIRouter, BackgroundTasks, Body, File, status, UploadFile
-from models.images import ImageModel, ImageCollection, ImageRequestBody,\
+from models.images import ImageModel, ImageCollection, ImagePostRequestModel,\
     ImagePostResponseModel
 from models.tesseract import TesseractConfigRequestModel
 from ocr.image_ocr import background_image_ocr
@@ -41,7 +41,7 @@ async def list_images():
 )
 async def create_image(
     background_tasks: BackgroundTasks,
-    image_properties: ImageRequestBody = Body(default=None),
+    image_properties: ImagePostRequestModel = Body(default=None),
     tesseract_config: TesseractConfigRequestModel = Body(default=None),
     file: UploadFile = File(...,
                             description='__Image (MAX 178956970 pixels)__')):

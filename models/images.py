@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Images model
 """
+from enum import Enum
 from models.base_model import APIBaseModel
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.functional_validators import BeforeValidator
@@ -15,15 +16,72 @@ import json
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
 
-class ImagePostResponseModel(APIBaseModel):
+class OcrOutputFormat(str, Enum):
+    """
+    ### Output file formats for image's OCR result.
+    """
+
+    string = 'str'
+    """Default mode."""
+    text = 'txt'
+    """For plain text file"""
+    mswrod = 'docx'
+    """For Microsoft Word file."""
+    pdf = 'pdf'
+    """For pdf file."""
+
+
+class ImagePostRequestModel(BaseModel):
+    """
+    ### An Optional Request body of `POST /images/` for image properties.
+
+    ### A serialized dictionary (`str`:`str`) of image properties.\
+    (All fields are optional)
+    """
+    # image fields to be set from request body
+    description: Union[str, None] = Field(
+        default=None, description='__Brief description of the image.__')
+
+    ocr_output_formats: List[OcrOutputFormat] = Field(
+        default=[OcrOutputFormat.string],
+        description="""__List of desired OCR output file formats.<br>By default
+        OCR result is saved in string form. If the result is to be saved in
+        file, and readily available for response,<br>one or more of `txt`,
+        `docx` or `pdf` must be passed when posting image. After posting the
+        image use the<br>`GET /ocr/{image_id}/` endpoint to get result in any
+        format.<br>String output is included in `GET /images/[{image_id}]`
+        response by default.__
+        """
+    )
+
+    # add config
+    model_config = ConfigDict(
+        json_schema_extra={
+            'example': {
+                'description': 'Sample page from amharic-amharic dictionary',
+                'ocr_output_formats': ['str']
+            }
+        },
+    )
+
+    # validate data when request is passed as string using Form. Used for
+    # endpoints having File parameters (Content-type: multipart/form-data)
+    @model_validator(mode='before')
+    @classmethod
+    def validate_to_json(cls, value):
+        if value is None or value == '':
+            return {}
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+
+        return value
+
+
+class ImagePostResponseModel(ImagePostRequestModel, APIBaseModel):
     """
     ### Abstraction of an Image in Response body for `POST /images`.
     """
     name: str = Field(..., description="__Uploaded image's filename.__")
-
-    description: Union[str, None] = Field(
-        default=None,
-        description='__Brief description of the image.__')
 
     ocr_finished: bool = Field(
         default=False,
@@ -38,6 +96,7 @@ class ImagePostResponseModel(APIBaseModel):
                 'updated_at': '2024-03-21T00:18:10.836000',
                 'name': 'image.png',
                 'description': 'Sample page from amharic-amharic dictionary',
+                'ocr_output_formats': ['str'],
                 'ocr_finished': False
             }
         },
@@ -93,6 +152,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
                 'image_format': 'PNG',
                 'image_mode': 'RGB',
                 'tess_config_id': '66008f3a64bd72e19e40aa7e',
+                'ocr_output_formats': ['str'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
             }
@@ -137,6 +197,7 @@ class ImageModel(ImageGetResponseModel):
                 'local_path':
                     '/ocr/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.png',
                 'tess_config_id': '66008f3a64bd72e19e40aa7e',
+                'ocr_output_formats': ['str'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
                 'ocr_result_dict': {
@@ -159,36 +220,3 @@ class ImageCollection(BaseModel):
     """  # noqa
     # list of images
     images: List[ImageGetResponseModel]
-
-
-class ImageRequestBody(BaseModel):
-    """
-    ### An Optional Request body of `POST /images/`.
-
-    ### A serialized dictionary (`str`:`str`) of image properties.\
-    (All fields are optional)
-    """
-    # image fields to be set from request body
-    description: Union[str, None] = Field(
-        default=None, description='__Brief description of the image.__')
-
-    # add config
-    model_config = ConfigDict(
-        json_schema_extra={
-            'example': {
-                'description': 'Sample page from amharic-amharic dictionary',
-            }
-        },
-    )
-
-    # validate data when request is passed as string using Form. Used for
-    # endpoints having File parameters (Content-type: multipart/form-data)
-    @model_validator(mode='before')
-    @classmethod
-    def validate_to_json(cls, value):
-        if value is None or value == '':
-            return {}
-        if isinstance(value, str):
-            return cls(**json.loads(value))
-
-        return value

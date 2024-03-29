@@ -10,30 +10,12 @@ import json
 
 # TODO: use Field for fields & add field desctiptions
 class Language(str, Enum):
-    """### Available OCR languages"""
+    """### Available OCR language models."""
     amharic = 'amh'
     amharic_old = 'amh-old'
     """Fine tuned amharic model (using old prints)"""
     english = 'eng'
     tigrigna = 'tig'
-
-
-class OcrOutputFormat(str, Enum):
-    """### OCR result output formats.
-
-    ### By default OCR result is saved in string form. If the result is to be\
-    saved in file, one of `txt`, `docx` or `pdf` must be passed. After\
-    uploading the image one can also use the `GET /ocr/{image_id}/` endpoint\
-    to get result in other formats."""
-
-    string = 'str'
-    """Default mode."""
-    text = 'txt'
-    """For plain text file"""
-    mswrod = 'docx'
-    """For Microsoft Word file."""
-    pdf = 'pdf'
-    """For pdf file."""
 
 
 class TesseractConfigRequestModel(BaseModel):
@@ -48,18 +30,10 @@ class TesseractConfigRequestModel(BaseModel):
     ### Check [tesseract_parameters](https://github.com/MenelikBerhan/REST-API_for_Ethiopic_Script_OCR/blob/image_ocr/utils/default_tesseract_parameters)\
     file for list of configurable tesseract variables to use for `config_vars`.
     """  # noqa
-    output_format: OcrOutputFormat = Field(
-        default=OcrOutputFormat.string,
-        description="""__OCR output file format. By default OCR result is saved
-        in string form. If the result is to be saved in file, one of `txt`,
-        `docx` or `pdf` must be passed. After uploading the image use the
-        `GET /ocr/{image_id}/` endpoint to get result in other formats.__
-        """
-    )
 
     language: Language = Field(
         default=Language.amharic_old,
-        description='__Language of text in image.__')
+        description='__Tesseract language model to use for OCR.__')
 
     oem: int = Field(
         default=1, ge=0, le=3,
@@ -81,7 +55,6 @@ class TesseractConfigRequestModel(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             'example': {
-                'output_format': 'str',
                 'language': 'amh-old',
                 'oem': 1,
                 'psm': 3,
@@ -118,7 +91,6 @@ class TesseractConfigModel(APIBaseModel, TesseractConfigRequestModel):
                 'id': '65fb7cc253b139befea1205c',
                 'created_at': '2024-03-21T00:18:10.836000',
                 'updated_at': '2024-03-21T00:18:10.836000',
-                'output_format': 'str',
                 'language': 'amh-old',
                 'oem': 1,
                 'psm': 3,

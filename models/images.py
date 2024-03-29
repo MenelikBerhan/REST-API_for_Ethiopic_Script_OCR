@@ -50,7 +50,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
     ### Abstraction of an Image in Response body for `GET /images`.
     """
     # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
-    tess_config_id: Optional[PyObjectId] = Field(
+    tess_config_id: Union[PyObjectId, None] = Field(
         default=None,
         description='__Id of tesseract configuration used for OCR.__')
 

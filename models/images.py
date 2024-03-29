@@ -113,6 +113,11 @@ class ImageGetResponseModel(ImagePostResponseModel):
         default=None,
         description='__Id of tesseract configuration used for OCR.__')
 
+    # id of TesseractOutputModel (`str` in model & `ObjectId` in db)
+    tess_output_id: Union[PyObjectId, None] = Field(
+        default=None,
+        description='__Id of tesseract output containing OCR results.__')
+
     # fields populated by background process after POST /images
     ocr_result_text: Union[str, None] = Field(
         default=None,
@@ -152,6 +157,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
                 'image_format': 'PNG',
                 'image_mode': 'RGB',
                 'tess_config_id': '66008f3a64bd72e19e40aa7e',
+                'tess_output_id': '66008f3a64bd72e19e40a43a',
                 'ocr_output_formats': ['str'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
@@ -167,11 +173,6 @@ class ImageModel(ImageGetResponseModel):
     # fields not in response model (but stored in db)
     local_path: Union[str, None] = Field(
         default=None, description='__Local storage path of image.__')
-
-    ocr_result_dict: Union[dict, None] = Field(
-        default=None,
-        description='__Detailed result of OCR by tesseract\
-        in a dictionay form.__')
 
     info: Union[dict, None] = Field(
         default=None,
@@ -200,12 +201,6 @@ class ImageModel(ImageGetResponseModel):
                 'ocr_output_formats': ['str'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
-                'ocr_result_dict': {
-                    'level': [1, 2], 'page_num': [1, 1], 'block_num': [0, 1],
-                    'par_num': [0, 0], 'line_num': [0, 1], 'word_num': [0, 1],
-                    'left': [0, 254], 'top': [0, 29], 'width': [644, 65],
-                    'height':  [56, 17], 'conf': [-1, 92], 'text': ['', 'ምንሊክ']
-                }
             }
         },  # type: ignore
     )

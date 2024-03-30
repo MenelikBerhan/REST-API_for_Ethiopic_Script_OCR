@@ -1,6 +1,7 @@
 """Utilities for file reading & writing operations
 """
 from config.setup import settings
+from copy import deepcopy
 from os import path, mkdir
 from PIL import Image
 from uuid import uuid4
@@ -31,7 +32,7 @@ async def background_write_file(file_buffer: bytes, file_name: str):
     image = Image.open(io.BytesIO(file_buffer))
 
     # remove unnecessary info that causes errors for large png files
-    info = image.info
+    info = deepcopy(image.info)
     info.pop('icc_profile', None)
 
     # get image metadata and update image in db with it

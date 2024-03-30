@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Images model
 """
+from bson import ObjectId
 from enum import Enum
 from models.base_model import APIBaseModel
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -83,10 +84,11 @@ class TesseractConfigRequestModel(BaseModel):
     @model_validator(mode='before')
     @classmethod
     def validate_to_json(cls, value):
-        if value is None or value == '':
-            return {}
-        if isinstance(value, str):
-            return cls(**json.loads(value))
+        if cls.__name__ == 'TesseractConfigRequestModel':
+            if value is None or value == '':
+                return {}
+            if isinstance(value, str):
+                return cls(**json.loads(value))
 
         return value
 
@@ -119,12 +121,12 @@ class TesseractOutputModel(APIBaseModel):
     """
     Model class for abstraction of image's tesseract OCR result.
     """
-    image_id: PyObjectId = Field(
+    image_id: ObjectId = Field(
         ...,
         description="Images id."
     )
 
-    tess_config_id: PyObjectId = Field(
+    tess_config_id: ObjectId = Field(
         ...,
         description='Tesseract configuration id.'
     )

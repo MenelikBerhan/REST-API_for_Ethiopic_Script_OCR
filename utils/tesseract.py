@@ -7,7 +7,7 @@ from db.mongodb import db_client
 from concurrent.futures import ThreadPoolExecutor
 from config.setup import settings
 from models.tesseract import TesseractConfigModel, TesseractOutputModel
-from PIL import Image
+from PIL.Image import Image
 import time
 
 

@@ -37,4 +37,4 @@ a 12-byte input or a 24-character hex string""")
             status.HTTP_404_NOT_FOUND,
             f"Image with given id: '{image_id}' doesn't exist.")
 
-    return [fmt for fmt in image['done_output_formats']]
+    return list(image['done_output_formats'].keys())

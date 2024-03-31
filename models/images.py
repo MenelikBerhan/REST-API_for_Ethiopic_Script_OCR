@@ -20,9 +20,6 @@ class OcrOutputFormat(str, Enum):
     """
     ### Output file formats for image's OCR result.
     """
-
-    string = 'str'
-    """Default mode."""
     text = 'txt'
     """For plain text file"""
     mswrod = 'docx'
@@ -39,17 +36,18 @@ class ImagePostRequestModel(BaseModel):
     (All fields are optional)
     """
     # image fields to be set from request body
-    description: Union[str, None] = Field(
-        default=None, description='__Brief description of the image.__')
+    description: str = Field(
+        default='', description='__Brief description of the image.__')
 
     ocr_output_formats: List[OcrOutputFormat] = Field(
-        default=[OcrOutputFormat.string],
-        description="""__List of desired OCR output file formats.<br>By default
-        OCR result is saved in string form. If the result is to be saved in
-        file, and readily available for response,<br>one or more of `txt`,
-        `docx` or `pdf` must be passed when posting image. After posting the
-        image use the<br>`GET /ocr/{image_id}/` endpoint to get result in any
-        format.<br>String output is included in `GET /images/[{image_id}]`
+        default=[],
+        description="""__List of desired OCR output file formats. (_By default
+        OCR result is saved in string form_).<br><br>If the result is also to be saved
+        in file, and readily available as a response for `GET /ocr/{image_id}/`
+        ,<br>one or more of `txt`, `docx` or `pdf` must be passed when posting
+        image.<br><br>After posting the image use the `GET /ocr/{image_id}/`
+        endpoint to get result in any format.<br>String output is included in
+        `GET /images/[{image_id}]`
         response by default.__
         """
     )
@@ -59,7 +57,7 @@ class ImagePostRequestModel(BaseModel):
         json_schema_extra={
             'example': {
                 'description': 'Sample page from amharic-amharic dictionary',
-                'ocr_output_formats': ['str']
+                'ocr_output_formats': ['txt']
             }
         },
     )
@@ -96,7 +94,7 @@ class ImagePostResponseModel(ImagePostRequestModel, APIBaseModel):
                 'updated_at': '2024-03-21T00:18:10.836000',
                 'name': 'image.png',
                 'description': 'Sample page from amharic-amharic dictionary',
-                'ocr_output_formats': ['str'],
+                'ocr_output_formats': ['txt'],
                 'ocr_finished': False
             }
         },
@@ -158,7 +156,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
                 'image_mode': 'RGB',
                 'tess_config_id': '66008f3a64bd72e19e40aa7e',
                 'tess_output_id': '66008f3a64bd72e19e40a43a',
-                'ocr_output_formats': ['str'],
+                'ocr_output_formats': ['txt'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
             }
@@ -206,7 +204,7 @@ class ImageModel(ImageGetResponseModel):
                 'ocr_output_formats': ['str'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
-                'done_output_formats': ['str']
+                'done_output_formats': ['txt']
             }
         },  # type: ignore
     )

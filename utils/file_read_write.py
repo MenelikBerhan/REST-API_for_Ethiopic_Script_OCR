@@ -5,6 +5,7 @@ from copy import deepcopy
 from os import path, mkdir
 from PIL import Image
 from uuid import uuid4
+import aiofiles
 import io
 
 
@@ -44,6 +45,8 @@ async def background_write_file(file_buffer: bytes, file_name: str):
         "info": info,
         }
 
-    # save image to local storage and return image & dict
-    image.save(file_path)
+    # save image to local storage asynchronously and return image & dict
+    async with aiofiles.open(file_path, 'wb') as new_image_file:
+        await new_image_file.write(file_buffer)
+
     return image, image_dict

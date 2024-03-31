@@ -137,9 +137,14 @@ class TesseractOutputModel(APIBaseModel):
     )
 
     time_taken: float = Field(
-        None,
+        ...,
         description='Time taken to OCR the image.'
     )
+
+    ocr_result_text: Union[str, None] = Field(
+        ...,
+        description="OCR result in string form."
+        )
 
     ocr_result_dict: Dict[str, Union[List[int], List[str]]] = Field(
         ...,

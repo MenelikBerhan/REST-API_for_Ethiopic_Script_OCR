@@ -2,7 +2,7 @@
 """
 from db.mongodb import db_client
 from fastapi import APIRouter, BackgroundTasks, Body, File, status, UploadFile
-from models.images import ImageModel, ImageCollection, ImageRequestBody,\
+from models.images import ImageModel, ImageCollection, ImagePostRequestModel,\
     ImagePostResponseModel
 from models.tesseract import TesseractConfigRequestModel
 from ocr.image_ocr import background_image_ocr
@@ -14,16 +14,16 @@ image_router = APIRouter(prefix='/images')
 
 @image_router.get(
     '/',
-    response_description='List all images',
+    response_description='__List of all images__',
     response_model=ImageCollection,
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
 async def list_images():
     """
-    List all of the images in the database.
+    ### List all of the images in the database.
 
-    The response is unpaginated and limited to 50 results.
+    ### The response is unpaginated and limited to 50 results.
     """
     return ImageCollection(images=await db_client.db.images.find().to_list(50))
 
@@ -33,7 +33,7 @@ async def list_images():
 # [Reference](https://stackoverflow.com/questions/65504438/how-to-add-both-file-and-json-body-in-a-fastapi-post-request/70640522#70640522)
 @image_router.post(
     '/',
-    response_description='Add new image',
+    response_description='__Created image__',
     response_model=ImagePostResponseModel,
     status_code=status.HTTP_201_CREATED,
     response_model_by_alias=False,
@@ -41,12 +41,13 @@ async def list_images():
 )
 async def create_image(
     background_tasks: BackgroundTasks,
-    image_properties: ImageRequestBody = Body(default=None),
+    image_properties: ImagePostRequestModel = Body(default=None),
     tesseract_config: TesseractConfigRequestModel = Body(default=None),
-    file: UploadFile = File(..., description='Image (MAX 178956970 pixels)'),
-        ):
+    file: UploadFile = File(...,
+                            description='__Image (MAX 178956970 pixels)__')):
     """
-    Insert a new image record into the database & save image in local storage.
+    ### Insert a new image record into the database, save image in local\
+    storage and perform OCR in the background.
     """
     # space in image files replaced by `_`
     file_name = file.filename.replace(' ', '_')
@@ -57,7 +58,7 @@ async def create_image(
     # add fields set in request body to image_dict.
     if image_properties:
         image_dict.update(
-            image_properties.model_dump(exclude_unset=True, exclude_none=True))
+            image_properties.model_dump(exclude_none=True))
 
     # create an ImageModel using image_dict
     image = ImageModel(**image_dict)
@@ -86,8 +87,7 @@ async def create_image(
     background_tasks.add_task(
         background_image_ocr,
         file_buffer,
-        file_name,
-        insert_result.inserted_id,
+        new_image_dict,
         tess_req_dict,
         )
 

@@ -25,14 +25,19 @@ class APIBaseModel(BaseModel):
     """
     # The primary key for the object in db (`str` in model & `ObjectId` in db)
     # Needs to be aliased since `_id` will be considered by pydentic as private
-    id: Optional[PyObjectId] = Field(alias='_id', default=None)
+    id: Optional[PyObjectId] = Field(
+        alias='_id',
+        default=None,
+        description='__Unique identifying string.__')
 
     # created & updated time stamp with timezone
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc))
+        default_factory=lambda: datetime.now(timezone.utc),
+        description='__Object creation time stamp.__')
 
     updated_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc))
+        default_factory=lambda: datetime.now(timezone.utc),
+        description='__Time stamp for last update on object.__')
 
     # configure Pydantic behaviour. (by name not to use aliase)
     model_config = ConfigDict(

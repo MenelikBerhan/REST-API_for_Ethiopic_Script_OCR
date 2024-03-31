@@ -58,7 +58,7 @@ async def create_image(
     # add fields set in request body to image_dict.
     if image_properties:
         image_dict.update(
-            image_properties.model_dump(exclude_unset=True, exclude_none=True))
+            image_properties.model_dump(exclude_none=True))
 
     # create an ImageModel using image_dict
     image = ImageModel(**image_dict)
@@ -87,8 +87,7 @@ async def create_image(
     background_tasks.add_task(
         background_image_ocr,
         file_buffer,
-        file_name,
-        insert_result.inserted_id,
+        new_image_dict,
         tess_req_dict,
         )
 

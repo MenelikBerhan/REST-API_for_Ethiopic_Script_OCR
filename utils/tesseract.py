@@ -118,6 +118,7 @@ async def background_run_tesseract(
         'image_id': image_id,
         'tess_config_id': tess_config_dict['id'],
         'time_taken': time_taken,
+        'ocr_result_text': ocr_result_text,
         'ocr_result_dict': ocr_result_dict,
     }
 

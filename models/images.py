@@ -182,7 +182,7 @@ class ImageModel(ImageGetResponseModel):
             {'jfif': 257, 'jfif_version': (1, 1), 'jfif_unit': 0,
              'jfif_density': (1, 1)}])
 
-    done_output_formats: List[str] = Field(
+    done_output_formats: List[OcrOutputFormat] = Field(
         default=[],
         description='__List of file formats OCR result is already saved in__'
     )

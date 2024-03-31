@@ -4,6 +4,7 @@ from config.setup import settings
 from db.mongodb import db_client
 from fastapi import FastAPI
 from api.v1.routes.images import image_router
+from api.v1.routes.ocr import ocr_router
 import uvicorn
 
 # create fastapi app
@@ -21,6 +22,7 @@ app.add_event_handler('shutdown', db_client.disconnect)
 
 # include routers in to the app
 app.include_router(image_router)
+app.include_router(ocr_router)
 
 
 if __name__ == '__main__':

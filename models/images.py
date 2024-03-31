@@ -42,13 +42,12 @@ class ImagePostRequestModel(BaseModel):
     ocr_output_formats: List[OcrOutputFormat] = Field(
         default=[],
         description="""__List of desired OCR output file formats. (_By default
-        OCR result is saved in string form_).<br><br>If the result is also to be saved
-        in file, and readily available as a response for `GET /ocr/{image_id}/`
-        ,<br>one or more of `txt`, `docx` or `pdf` must be passed when posting
-        image.<br><br>After posting the image use the `GET /ocr/{image_id}/`
-        endpoint to get result in any format.<br>String output is included in
-        `GET /images/[{image_id}]`
-        response by default.__
+        OCR result is saved in string form_).<br><br>If the result is also to
+        be saved in file, and readily available as a response for
+        `GET /ocr/{image_id}/`,<br>one or more of `txt`, `docx` or `pdf` must
+        be passed when posting image.<br><br>After posting the image use the
+        `GET /ocr/{image_id}/` endpoint to get result in any format.<br>String
+        output is included in `GET /images/[{image_id}]` response by default.__
         """
     )
 

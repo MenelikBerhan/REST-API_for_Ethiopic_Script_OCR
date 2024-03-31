@@ -182,6 +182,11 @@ class ImageModel(ImageGetResponseModel):
             {'jfif': 257, 'jfif_version': (1, 1), 'jfif_unit': 0,
              'jfif_density': (1, 1)}])
 
+    done_output_formats: List[str] = Field(
+        default=[],
+        description='__List of file formats OCR result is already saved in__'
+    )
+
     # add config
     model_config = ConfigDict(
         json_schema_extra={
@@ -201,6 +206,7 @@ class ImageModel(ImageGetResponseModel):
                 'ocr_output_formats': ['str'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
+                'done_output_formats': ['str']
             }
         },  # type: ignore
     )

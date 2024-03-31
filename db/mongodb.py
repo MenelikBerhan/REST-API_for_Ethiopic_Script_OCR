@@ -3,7 +3,6 @@
 from config.setup import settings
 from motor.motor_asyncio import AsyncIOMotorClient
 from motor.core import AgnosticClient, AgnosticDatabase
-from typing import Union
 
 
 class DbClient:
@@ -25,5 +24,6 @@ class DbClient:
         """Closes mongodb connection on app shutdown."""
         print("Closing connection to mongodb database")
         self.client.close()
+
 
 db_client = DbClient()

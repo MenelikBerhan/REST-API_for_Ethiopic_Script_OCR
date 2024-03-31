@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.functional_validators import BeforeValidator
 from typing import List, Tuple, Union
 from typing_extensions import Annotated
-from typing import Optional
+from typing import Dict
 import json
 
 
@@ -174,15 +174,16 @@ class ImageModel(ImageGetResponseModel):
 
     info: Union[dict, None] = Field(
         default=None,
-        description='__A dictionary holding data associated with the image.__',
+        description='A dictionary holding data associated with the image.',
         examples=[
             {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
             {'jfif': 257, 'jfif_version': (1, 1), 'jfif_unit': 0,
              'jfif_density': (1, 1)}])
 
-    done_output_formats: List[OcrOutputFormat] = Field(
-        default=[],
-        description='__List of file formats OCR result is already saved in__'
+    done_output_formats: Dict[OcrOutputFormat, str] = Field(
+        default={},
+        description="""Key value pair of saved output file formats
+        and their path in local storage."""
     )
 
     # add config
@@ -204,7 +205,9 @@ class ImageModel(ImageGetResponseModel):
                 'ocr_output_formats': ['str'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
-                'done_output_formats': ['txt']
+                'done_output_formats': {
+                    'txt': '/ocr/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.'
+                    }
             }
         },  # type: ignore
     )

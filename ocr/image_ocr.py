@@ -42,4 +42,5 @@ async def background_image_ocr(
         "updated_at": datetime.now(timezone.utc)})
 
     await db_client.db.images.update_one(
-        {'_id': ObjectId(image_id)}, {'$set': image_dict})
+        {'_id': ObjectId(image_id)},
+        {'$set': image_dict, '$push': {'done_output_formats': 'str'}})

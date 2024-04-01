@@ -6,6 +6,7 @@ from db.mongodb import db_client
 from fastapi import APIRouter, HTTPException, status, Query
 from fastapi.responses import FileResponse, JSONResponse
 from models.images import OcrOutputFormat
+from os import path
 from typing import List
 
 
@@ -72,18 +73,26 @@ async def get_ocr_result(
     """
     ### Get images OCR result as a string or a file.
     """
-    print(image_id)
     # retrieve image from db
     image = await get_image_by_id(image_id)
 
     if format == 'str':
         return JSONResponse(image['ocr_result_text'])
+
     if format not in image['done_output_formats']:
         if add_format:      # create output file in missing format
             return JSONResponse(f"Creating output file for '{format}' format.")
 
         raise HTTPException(
             status.HTTP_404_NOT_FOUND,
-            f"OCR output not ready in '{format}' format.")
+            f"Given format '{format}' not in image's `ocr_output_formats` \
+list. To add it to the list and get the result set `add_format` \
+to `True`.")
 
-    return image['done_output_formats'][format]
+    # set output file name from image name
+    base_name, _ = path.splitext(image['name'])
+    output_file_name = base_name + '_ocr-result.' + format
+
+    return FileResponse(
+        image['done_output_formats'][format], filename=output_file_name
+        )

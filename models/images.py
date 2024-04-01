@@ -20,6 +20,8 @@ class OcrOutputFormat(str, Enum):
     """
     ### Output file formats for image's OCR result.
     """
+    string = 'str'
+    """Default mode.(No file saved)"""
     text = 'txt'
     """For plain text file"""
     mswrod = 'docx'
@@ -40,7 +42,7 @@ class ImagePostRequestModel(BaseModel):
         default='', description='__Brief description of the image.__')
 
     ocr_output_formats: List[OcrOutputFormat] = Field(
-        default=[],
+        default=['str'], min_length=1,
         description="""__List of desired OCR output file formats. (_By default
         OCR result is saved in string form_).<br><br>If the result is also to
         be saved in file, and readily available as a response for
@@ -201,7 +203,7 @@ class ImageModel(ImageGetResponseModel):
                 'local_path':
                     '/ocr/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.png',
                 'tess_config_id': '66008f3a64bd72e19e40aa7e',
-                'ocr_output_formats': ['str'],
+                'ocr_output_formats': ['txt'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
                 'done_output_formats': {

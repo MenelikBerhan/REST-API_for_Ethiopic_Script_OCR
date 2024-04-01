@@ -123,6 +123,11 @@ class ImageGetResponseModel(ImagePostResponseModel):
         default=None,
         description="__Result of OCR by tesseract in string form.__")
 
+    ocr_accuracy: Union[float, None] = Field(
+        default=None,
+        description='Average confidence level of words recognized.'
+    )
+
     image_size: Union[Tuple[int, int], None] = Field(
         default=None,
         description='__`(width, height)` of the image in pixles.__',
@@ -161,6 +166,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
                 'ocr_output_formats': ['txt'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
+                'ocr_accuracy': 87.8,
             }
         },  # type: ignore
     )
@@ -207,6 +213,7 @@ class ImageModel(ImageGetResponseModel):
                 'ocr_output_formats': ['txt'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
+                'ocr_accuracy': 87.8,
                 'done_output_formats': {
                     'txt': '/ocr/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.'
                     }

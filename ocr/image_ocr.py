@@ -31,7 +31,7 @@ async def background_image_ocr(
     print('Image: WRITTEN 2 LOCAL')
 
     # run tesseract in background & get output model dict & result text
-    tess_output_dict, ocr_result_text = await background_run_tesseract(
+    tess_output_dict = await background_run_tesseract(
         image, image_dict['id'], tess_config_dict
         )
     print('Tesseract: OCR FINISHED')
@@ -60,7 +60,8 @@ async def background_image_ocr(
     # update image in db
     image_update_dict.update({
         'ocr_finished': True,
-        'ocr_result_text': ocr_result_text,
+        'ocr_result_text': tess_output_dict['ocr_result_text'],
+        'ocr_accuracy': tess_output_dict['ocr_accuracy'],
         'tess_output_id': tess_output_dict['id'],
         "tess_config_id": tess_config_dict['id'],
         'updated_at': datetime.now(timezone.utc)

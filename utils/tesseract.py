@@ -8,7 +8,52 @@ from concurrent.futures import ThreadPoolExecutor
 from config.setup import settings
 from models.tesseract import TesseractConfigModel, TesseractOutputModel
 from PIL.Image import Image
+from typing import Tuple
 import time
+
+
+def parse_ocr_result(result_dict: dict) -> Tuple[str, float]:
+    """
+    Extracts OCR result text and accuracy from OCR result dict.
+
+    Args:
+        result_dict (dict): A dictionary containing detailed OCR result.
+        Contains information about recognized words location in the input
+        image and the confidence they are recognized with. Keys in dict:
+        [`level`, `page_num`, `block_num`, `par_num`, `line_num`, `word_num`,
+        `left`, `top`,  `width`, `height`, `conf` and `text`].
+
+    Returns:
+        (tuple[str, float]): a tuple of ocr result text and average confidence
+    """
+    # get indices of paragraphs, lines and words (levels 4 & 5)
+    word_line_par_indces = [
+        i for i in range(len(result_dict['level']))
+        if result_dict['level'][i] in (3, 4, 5)
+    ]
+
+    ocr_result_text = ''
+    confidence_sum = 0
+    total_words = 0
+    # concatenate strings & find mean confidence
+    for i in word_line_par_indces:
+        if result_dict['level'][i] in (3, 4):
+            # add newline for lines & paragraphs
+            if not ocr_result_text.endswith('\n\n'):
+                ocr_result_text += '\n'
+        else:
+            # add space b/n words (while skipping space words)
+            if not result_dict['text'][i].isspace():
+                ocr_result_text += result_dict['text'][i] + ' '
+                confidence_sum += result_dict['conf'][i]
+                total_words += 1
+
+    if total_words != 0:
+        mean_confidence = round(confidence_sum / total_words, 2)
+    else:   # no words recognized (one cause: misconfiguration of tesseract)
+        mean_confidence = 0
+
+    return ocr_result_text, mean_confidence
 
 
 async def background_setup_tess_config(tess_req_dict: dict) -> dict:
@@ -60,12 +105,16 @@ OCR_IN_PROGRESS: int = 0
 
 async def background_run_tesseract(
         image: Image, image_id: str, tess_config_dict: dict):
-    """Runs tesseract in a ThreadPool and returns the result.
+    """
+    Runs tesseract in a ThreadPool and returns the result.
 
     Args:
         image (Image): image loaded using PIL
         image_id (str): id of image in database
         tess_config_dict (dict): tesseract configuration dictionary
+
+    Returns:
+        (dict): a dictionary with information about ocr process and result.
     """
     # set as global (otherwise UnboundLocalError: referenced before assignment)
     global OCR_IN_PROGRESS
@@ -110,8 +159,8 @@ async def background_run_tesseract(
 
         OCR_IN_PROGRESS = OCR_IN_PROGRESS - 1
 
-        # TODO: extract text from dict in a separate function
-        ocr_result_text = " ".join(ocr_result_dict['text'])
+    # parse result dict and get text and accuracy
+    ocr_result_text, ocr_accuracy = parse_ocr_result(ocr_result_dict)
 
     # create a TesseractOutputModel for this image OCR
     tess_output_dict = {
@@ -120,6 +169,7 @@ async def background_run_tesseract(
         'time_taken': time_taken,
         'ocr_result_text': ocr_result_text,
         'ocr_result_dict': ocr_result_dict,
+        'ocr_accuracy': ocr_accuracy
     }
 
     tess_output = TesseractOutputModel(**tess_output_dict)
@@ -130,4 +180,4 @@ async def background_run_tesseract(
 
     tess_output_dict['id'] = insert_result.inserted_id
 
-    return tess_output_dict, ocr_result_text
+    return tess_output_dict

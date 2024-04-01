@@ -49,8 +49,8 @@ class ImagePostRequestModel(BaseModel):
         `GET /ocr/image/{image_id}/`,<br>one or more of `txt`, `docx` or `pdf`
         must be passed when posting image.<br><br>After posting the image use
         the `GET /ocr/image/{image_id}/` endpoint to get result in any format.
-        <br>String output is included in `GET /ocr/image/[{image_id}]`
-        response by default.__
+        <br>String output is included in `GET /image/[{image_id}]` response by
+        default.__
         """
     )
 
@@ -59,7 +59,7 @@ class ImagePostRequestModel(BaseModel):
         json_schema_extra={
             'example': {
                 'description': 'Sample page from amharic-amharic dictionary',
-                'ocr_output_formats': ['txt']
+                'ocr_output_formats': ['str', 'txt']
             }
         },
     )
@@ -96,7 +96,7 @@ class ImagePostResponseModel(ImagePostRequestModel, APIBaseModel):
                 'updated_at': '2024-03-21T00:18:10.836000',
                 'name': 'image.png',
                 'description': 'Sample page from amharic-amharic dictionary',
-                'ocr_output_formats': ['txt'],
+                'ocr_output_formats': ['str', 'txt'],
                 'ocr_finished': False
             }
         },
@@ -125,7 +125,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
 
     ocr_accuracy: Union[float, None] = Field(
         default=None,
-        description='Average confidence level of words recognized.'
+        description='__Average confidence level of words recognized.__'
     )
 
     image_size: Union[Tuple[int, int], None] = Field(
@@ -163,7 +163,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
                 'image_mode': 'RGB',
                 'tess_config_id': '66008f3a64bd72e19e40aa7e',
                 'tess_output_id': '66008f3a64bd72e19e40a43a',
-                'ocr_output_formats': ['txt'],
+                'ocr_output_formats': ['str', 'txt'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
                 'ocr_accuracy': 87.8,
@@ -210,7 +210,7 @@ class ImageModel(ImageGetResponseModel):
                 'local_path':
                     '/ocr/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.png',
                 'tess_config_id': '66008f3a64bd72e19e40aa7e',
-                'ocr_output_formats': ['txt'],
+                'ocr_output_formats': ['str', 'txt'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
                 'ocr_accuracy': 87.8,

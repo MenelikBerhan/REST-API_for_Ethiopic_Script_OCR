@@ -64,8 +64,9 @@ async def background_write_ocr_result(
         tess_output_dict (dict): dictionary dump of OCR result in db
     """
     write_result_dict = {}
-    # write OCR result to a plain text file
-    if 'txt' in image_dict['ocr_output_formats']:
+    # write OCR result to a plain text file if not done already
+    if 'txt' in image_dict['ocr_output_formats'] and\
+            'txt' not in image_dict['done_output_formats']:
         # use image file name in local storage for text file name.
         # Saves in same directory as image
         base_name, _ = path.splitext(image_path)

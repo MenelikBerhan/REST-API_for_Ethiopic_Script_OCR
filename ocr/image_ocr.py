@@ -44,11 +44,15 @@ async def background_image_ocr(
     # if str is not in output file formats list add it (default)
     if 'str' not in image_dict['ocr_output_formats']:
         image_dict['ocr_output_formats'].append('str')
+        # add it to update dict also (to update image in db)
         image_update_dict['ocr_output_formats'] = image_dict[
             'ocr_output_formats']
 
     # write OCR result to file (text, word or pdf)
-    if image_dict['ocr_output_formats'] != ['str']:
+    if any([fmt in image_dict['ocr_output_formats']
+            for fmt in ('txt', 'docx', 'pdf')]):
+
+        # write files and get their path
         write_ocr_result_dict = await background_write_ocr_result(
             image_update_dict['local_path'], image_dict, tess_output_dict
         )

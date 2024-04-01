@@ -2,6 +2,8 @@
 """
 from config.setup import settings
 from copy import deepcopy
+from docx import Document
+from fpdf import FPDF
 from os import path, mkdir
 from PIL import Image
 from uuid import uuid4
@@ -64,17 +66,64 @@ async def background_write_ocr_result(
         tess_output_dict (dict): dictionary dump of OCR result in db
     """
     write_result_dict = {}
+
+    # use image file name in local storage for ocr output file name.
+    # Saves in same directory as image
+    base_name, _ = path.splitext(image_path)
+    text = tess_output_dict['ocr_result_text']
+
     # write OCR result to a plain text file if not done already
     if 'txt' in image_dict['ocr_output_formats'] and\
             'txt' not in image_dict['done_output_formats']:
-        # use image file name in local storage for text file name.
-        # Saves in same directory as image
-        base_name, _ = path.splitext(image_path)
+
+        # set txt file path
         txt_file_path = base_name + '.txt'
 
+        # write text to file & set path in write_result_dict
         async with aiofiles.open(txt_file_path, 'w') as txt_file:
-            await txt_file.write(tess_output_dict['ocr_result_text'])
+            await txt_file.write(text)
         write_result_dict['txt'] = txt_file_path
 
-    # TODO: add docx & pdf writers (preferably async)
+    # write OCR result to a ms word (docx) file if not done already
+    if 'docx' in image_dict['ocr_output_formats'] and\
+            'docx' not in image_dict['done_output_formats']:
+        # set docx file path
+        docx_file_path = base_name + '.docx'
+
+        # create word document and add text to new paragraph
+        document = Document()
+        par = document.add_paragraph().add_run(text)
+        # set font (must use official font name)
+        par.font.name = 'Abyssinica SIL'
+
+        # save file and set path in write_result_dict
+        document.save(docx_file_path)
+        write_result_dict['docx'] = docx_file_path
+
+    # write OCR result to a pdf file if not done already
+    if 'pdf' in image_dict['ocr_output_formats'] and\
+            'pdf' not in image_dict['done_output_formats']:
+        # set pdf file path
+        pdf_file_path = base_name + '.pdf'
+
+        # get font path & name, line width & height
+        font_path = './utils/fonts/AbyssinicaSIL-Regular.ttf'
+        font_name = 'Abyssinica SIL'    # can use custom font names
+        w, h = (0, 5)   # 0 width means use all available width
+
+        # create pdf document & set params
+        pdf = FPDF()
+        # set params
+        pdf.set_auto_page_break(True)
+        pdf.add_font(font_name, fname=font_path)
+        pdf.set_font(font_name)
+
+        # add new page & write text
+        pdf.add_page()
+        pdf.multi_cell(w=w, h=h, text=text)
+
+        # save pdf and set path in write_result_dict
+        pdf.output(pdf_file_path)
+        write_result_dict['pdf'] = pdf_file_path
+
     return write_result_dict

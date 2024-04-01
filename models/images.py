@@ -32,7 +32,7 @@ class OcrOutputFormat(str, Enum):
 
 class ImagePostRequestModel(BaseModel):
     """
-    ### An Optional Request body of `POST /images/` for image properties.
+    ### An Optional Request body of `POST /image/` for image properties.
 
     ### A serialized dictionary (`str`:`str`) of image properties.\
     (All fields are optional)
@@ -46,10 +46,11 @@ class ImagePostRequestModel(BaseModel):
         description="""__List of desired OCR output file formats. (_By default
         OCR result is saved in string form_).<br><br>If the result is also to
         be saved in file, and readily available as a response for
-        `GET /ocr/{image_id}/`,<br>one or more of `txt`, `docx` or `pdf` must
-        be passed when posting image.<br><br>After posting the image use the
-        `GET /ocr/{image_id}/` endpoint to get result in any format.<br>String
-        output is included in `GET /images/[{image_id}]` response by default.__
+        `GET /ocr/image/{image_id}/`,<br>one or more of `txt`, `docx` or `pdf`
+        must be passed when posting image.<br><br>After posting the image use
+        the `GET /ocr/image/{image_id}/` endpoint to get result in any format.
+        <br>String output is included in `GET /ocr/image/[{image_id}]`
+        response by default.__
         """
     )
 
@@ -78,7 +79,7 @@ class ImagePostRequestModel(BaseModel):
 
 class ImagePostResponseModel(ImagePostRequestModel, APIBaseModel):
     """
-    ### Abstraction of an Image in Response body for `POST /images`.
+    ### Abstraction of an Image in Response body for `POST /image/`.
     """
     name: str = Field(..., description="__Uploaded image's filename.__")
 
@@ -105,7 +106,7 @@ class ImagePostResponseModel(ImagePostRequestModel, APIBaseModel):
 # used to hide properties like `local_path` that will be stored in db
 class ImageGetResponseModel(ImagePostResponseModel):
     """
-    ### Abstraction of an Image in Response body for `GET /images`.
+    ### Abstraction of an Image in Response body for `GET /image/`.
     """
     # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
     tess_config_id: Union[PyObjectId, None] = Field(

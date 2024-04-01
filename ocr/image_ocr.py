@@ -36,15 +36,26 @@ async def background_image_ocr(
         )
     print('Tesseract: OCR FINISHED')
 
+    # add `str` output format to `done_output_formats`
+    image_update_dict['done_output_formats'] = {
+        'str': 'Set to Images `ocr_result_text` field.'
+        }
+
+    # if str is not in output file formats list add it (default)
+    if 'str' not in image_dict['ocr_output_formats']:
+        image_dict['ocr_output_formats'].append('str')
+        image_update_dict['ocr_output_formats'] = image_dict[
+            'ocr_output_formats']
+
     # write OCR result to file (text, word or pdf)
-    if image_dict['ocr_output_formats']:
-        write_result_dict = await background_write_ocr_result(
+    if image_dict['ocr_output_formats'] != ['str']:
+        write_ocr_result_dict = await background_write_ocr_result(
             image_update_dict['local_path'], image_dict, tess_output_dict
         )
-        print(f"Result Saved in {list(write_result_dict.keys())} formats")
+        print(f"Result Saved in {list(write_ocr_result_dict.keys())} formats")
 
-        # add saved outptut formats to `done_output_formats`
-        image_update_dict['done_output_formats'] = write_result_dict
+        # add saved outptut formats to `done_output_formats`.
+        image_update_dict['done_output_formats'].update(write_ocr_result_dict)
 
     # update image in db
     image_update_dict.update({
@@ -57,4 +68,6 @@ async def background_image_ocr(
 
     await db_client.db.images.update_one(
         {'_id': ObjectId(image_dict['id'])},
-        {'$set': image_update_dict})
+        {'$set': image_update_dict},
+        True   # upsert=True (update nested docs too. else replace inner docs.)
+        )

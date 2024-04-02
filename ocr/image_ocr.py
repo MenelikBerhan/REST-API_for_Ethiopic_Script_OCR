@@ -3,10 +3,10 @@
 from bson import ObjectId
 from datetime import datetime, timezone
 from db.mongodb import db_client
-from utils.file_read_write import background_write_file,\
-    background_write_ocr_result
+from utils.file_read_write import background_write_file_image,\
+    background_write_ocr_result_image
 from utils.tesseract import background_setup_tess_config,\
-    background_run_tesseract
+    background_run_tesseract_image
 
 
 async def background_image_ocr(
@@ -25,13 +25,13 @@ async def background_image_ocr(
     print('Tesseract: CONFIGURED')
 
     # save image in local storage & get image_dict (metadata & storage path)
-    image, image_update_dict = await background_write_file(
+    image, image_update_dict = await background_write_file_image(
         file_buffer, image_dict['name']
         )
     print('Image: WRITTEN 2 LOCAL')
 
     # run tesseract in background & get output model dict & result text
-    tess_output_dict = await background_run_tesseract(
+    tess_output_dict = await background_run_tesseract_image(
         image, image_dict['id'], tess_config_dict
         )
     print('Tesseract: OCR FINISHED')
@@ -53,7 +53,7 @@ async def background_image_ocr(
             for fmt in ('txt', 'docx', 'pdf')]):
 
         # write files and get their path
-        write_ocr_result_dict = await background_write_ocr_result(
+        write_ocr_result_dict = await background_write_ocr_result_image(
             image_update_dict['local_path'], image_dict, tess_output_dict
         )
         print(f"Result Saved in {list(write_ocr_result_dict.keys())} formats")

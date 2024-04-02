@@ -13,7 +13,7 @@ import aiofiles
 import io
 
 
-async def background_write_file_images(file_buffer: bytes, file_name: str)\
+async def background_write_file_image(file_buffer: bytes, file_name: str)\
     -> Tuple[Image.Image, dict]:
     """
     Retrieves image metadata from image buffer and saves image to local
@@ -135,7 +135,7 @@ async def background_write_file_pdf(file_buffer: bytes, file_name: str)\
     return pdf_images, pdf_dict
 
 
-async def background_write_ocr_result(
+async def background_write_ocr_result_image(
         image_path: str, image_dict: dict, tess_output_dict: dict
         ):
     """

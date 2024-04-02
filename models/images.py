@@ -20,6 +20,8 @@ class OcrOutputFormat(str, Enum):
     """
     ### Output file formats for image's OCR result.
     """
+    string = 'str'
+    """Default mode.(No file saved)"""
     text = 'txt'
     """For plain text file"""
     mswrod = 'docx'
@@ -30,7 +32,7 @@ class OcrOutputFormat(str, Enum):
 
 class ImagePostRequestModel(BaseModel):
     """
-    ### An Optional Request body of `POST /images/` for image properties.
+    ### An Optional Request body of `POST /image/` for image properties.
 
     ### A serialized dictionary (`str`:`str`) of image properties.\
     (All fields are optional)
@@ -40,14 +42,15 @@ class ImagePostRequestModel(BaseModel):
         default='', description='__Brief description of the image.__')
 
     ocr_output_formats: List[OcrOutputFormat] = Field(
-        default=[],
+        default=['str'], min_length=1,
         description="""__List of desired OCR output file formats. (_By default
         OCR result is saved in string form_).<br><br>If the result is also to
         be saved in file, and readily available as a response for
-        `GET /ocr/{image_id}/`,<br>one or more of `txt`, `docx` or `pdf` must
-        be passed when posting image.<br><br>After posting the image use the
-        `GET /ocr/{image_id}/` endpoint to get result in any format.<br>String
-        output is included in `GET /images/[{image_id}]` response by default.__
+        `GET /ocr/image/{image_id}/`,<br>one or more of `txt`, `docx` or `pdf`
+        must be passed when posting image.<br><br>After posting the image use
+        the `GET /ocr/image/{image_id}/` endpoint to get result in any format.
+        <br>String output is included in `GET /image/[{image_id}]` response by
+        default.__
         """
     )
 
@@ -56,7 +59,7 @@ class ImagePostRequestModel(BaseModel):
         json_schema_extra={
             'example': {
                 'description': 'Sample page from amharic-amharic dictionary',
-                'ocr_output_formats': ['txt']
+                'ocr_output_formats': ['str', 'txt']
             }
         },
     )
@@ -76,7 +79,7 @@ class ImagePostRequestModel(BaseModel):
 
 class ImagePostResponseModel(ImagePostRequestModel, APIBaseModel):
     """
-    ### Abstraction of an Image in Response body for `POST /images`.
+    ### Abstraction of an Image in Response body for `POST /image/`.
     """
     name: str = Field(..., description="__Uploaded image's filename.__")
 
@@ -93,7 +96,7 @@ class ImagePostResponseModel(ImagePostRequestModel, APIBaseModel):
                 'updated_at': '2024-03-21T00:18:10.836000',
                 'name': 'image.png',
                 'description': 'Sample page from amharic-amharic dictionary',
-                'ocr_output_formats': ['txt'],
+                'ocr_output_formats': ['str', 'txt'],
                 'ocr_finished': False
             }
         },
@@ -103,23 +106,9 @@ class ImagePostResponseModel(ImagePostRequestModel, APIBaseModel):
 # used to hide properties like `local_path` that will be stored in db
 class ImageGetResponseModel(ImagePostResponseModel):
     """
-    ### Abstraction of an Image in Response body for `GET /images`.
+    ### Abstraction of an Image in Response body for `GET /image/`.
     """
-    # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
-    tess_config_id: Union[PyObjectId, None] = Field(
-        default=None,
-        description='__Id of tesseract configuration used for OCR.__')
-
-    # id of TesseractOutputModel (`str` in model & `ObjectId` in db)
-    tess_output_id: Union[PyObjectId, None] = Field(
-        default=None,
-        description='__Id of tesseract output containing OCR results.__')
-
-    # fields populated by background process after POST /images
-    ocr_result_text: Union[str, None] = Field(
-        default=None,
-        description="__Result of OCR by tesseract in string form.__")
-
+    # informations about image
     image_size: Union[Tuple[int, int], None] = Field(
         default=None,
         description='__`(width, height)` of the image in pixles.__',
@@ -141,6 +130,25 @@ class ImageGetResponseModel(ImagePostResponseModel):
             'RGBA (4x8-bit pixels, true color with transparency mask)',
             'CMYK (4x8-bit pixels, color separation)'])
 
+    # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
+    tess_config_id: Union[PyObjectId, None] = Field(
+        default=None,
+        description='__Id of tesseract configuration used for OCR.__')
+
+    # id of TesseractOutputModel (`str` in model & `ObjectId` in db)
+    tess_output_id: Union[PyObjectId, None] = Field(
+        default=None,
+        description='__Id of tesseract output containing OCR results.__')
+
+    ocr_accuracy: Union[float, None] = Field(
+        default=None,
+        description='__Average confidence level of words recognized.__'
+    )
+
+    ocr_result_text: Union[str, None] = Field(
+        default=None,
+        description="__Result of OCR by tesseract in string form.__")
+
     # add config
     model_config = ConfigDict(
         json_schema_extra={
@@ -155,9 +163,10 @@ class ImageGetResponseModel(ImagePostResponseModel):
                 'image_mode': 'RGB',
                 'tess_config_id': '66008f3a64bd72e19e40aa7e',
                 'tess_output_id': '66008f3a64bd72e19e40a43a',
-                'ocr_output_formats': ['txt'],
+                'ocr_output_formats': ['str', 'txt'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
+                'ocr_accuracy': 87.8,
             }
         },  # type: ignore
     )
@@ -201,9 +210,10 @@ class ImageModel(ImageGetResponseModel):
                 'local_path':
                     '/ocr/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.png',
                 'tess_config_id': '66008f3a64bd72e19e40aa7e',
-                'ocr_output_formats': ['str'],
+                'ocr_output_formats': ['str', 'txt'],
                 'ocr_finished': True,
                 'ocr_result_text': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት።',
+                'ocr_accuracy': 87.8,
                 'done_output_formats': {
                     'txt': '/ocr/image_c34bbe0d-298c-4fe0-a799-e57b885d0375.'
                     }

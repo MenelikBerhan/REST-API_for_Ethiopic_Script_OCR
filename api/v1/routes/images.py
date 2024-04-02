@@ -9,7 +9,7 @@ from ocr.image_ocr import background_image_ocr
 
 
 # create a router with `/images` prefix
-image_router = APIRouter(prefix='/images')
+image_router = APIRouter(prefix='/image')
 
 
 @image_router.get(

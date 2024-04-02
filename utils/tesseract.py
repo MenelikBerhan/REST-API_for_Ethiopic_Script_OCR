@@ -5,7 +5,7 @@ import pytesseract as pts
 from db.mongodb import db_client
 from concurrent.futures import ThreadPoolExecutor
 from config.setup import settings
-from models.tesseract import TesseractConfigModel, TesseractOutputModel,\
+from models.tesseract import TesseractConfigModel, TesseractOutputModelImage,\
     TesseractOutputModelPdf
 from PIL.Image import Image
 from typing import List, Tuple
@@ -172,7 +172,7 @@ async def background_run_tesseract_image(
         'ocr_result_dict': ocr_result_dict,
     }
 
-    tess_output = TesseractOutputModel(**tess_output_dict)
+    tess_output = TesseractOutputModelImage(**tess_output_dict)
 
     # save output model in db
     tess_output_dict = tess_output.model_dump(exclude={'id'})

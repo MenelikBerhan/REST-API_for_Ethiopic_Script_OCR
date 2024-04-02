@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from models.images import OcrOutputFormat
 from os import path
 from typing import List
-from utils.file_read_write import background_write_ocr_result
+from utils.file_read_write import background_write_ocr_result_image
 
 
 # create a router with `/images` prefix
@@ -95,7 +95,7 @@ to `True`.")
         image['ocr_output_formats'].append(format)
 
         # write ocr output files & get their path (in returned dict)
-        write_ocr_result_dict = await background_write_ocr_result(
+        write_ocr_result_dict = await background_write_ocr_result_image(
             image['local_path'], image,
             {'ocr_result_text': image['ocr_result_text']}
         )

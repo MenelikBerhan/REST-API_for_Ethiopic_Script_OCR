@@ -108,26 +108,7 @@ class ImageGetResponseModel(ImagePostResponseModel):
     """
     ### Abstraction of an Image in Response body for `GET /image/`.
     """
-    # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
-    tess_config_id: Union[PyObjectId, None] = Field(
-        default=None,
-        description='__Id of tesseract configuration used for OCR.__')
-
-    # id of TesseractOutputModel (`str` in model & `ObjectId` in db)
-    tess_output_id: Union[PyObjectId, None] = Field(
-        default=None,
-        description='__Id of tesseract output containing OCR results.__')
-
-    # fields populated by background process after POST /images
-    ocr_result_text: Union[str, None] = Field(
-        default=None,
-        description="__Result of OCR by tesseract in string form.__")
-
-    ocr_accuracy: Union[float, None] = Field(
-        default=None,
-        description='__Average confidence level of words recognized.__'
-    )
-
+    # informations about image
     image_size: Union[Tuple[int, int], None] = Field(
         default=None,
         description='__`(width, height)` of the image in pixles.__',
@@ -148,6 +129,26 @@ class ImageGetResponseModel(ImagePostResponseModel):
             'RGB (3x8-bit pixels, true color)',
             'RGBA (4x8-bit pixels, true color with transparency mask)',
             'CMYK (4x8-bit pixels, color separation)'])
+
+    # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
+    tess_config_id: Union[PyObjectId, None] = Field(
+        default=None,
+        description='__Id of tesseract configuration used for OCR.__')
+
+    # id of TesseractOutputModel (`str` in model & `ObjectId` in db)
+    tess_output_id: Union[PyObjectId, None] = Field(
+        default=None,
+        description='__Id of tesseract output containing OCR results.__')
+
+    ocr_accuracy: Union[float, None] = Field(
+        default=None,
+        description='__Average confidence level of words recognized.__'
+    )
+
+    ocr_result_text: Union[str, None] = Field(
+        default=None,
+        description="__Result of OCR by tesseract in string form.__")
+
 
     # add config
     model_config = ConfigDict(

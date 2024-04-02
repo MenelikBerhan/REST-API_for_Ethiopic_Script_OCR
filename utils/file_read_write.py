@@ -4,24 +4,36 @@ from config.setup import settings
 from copy import deepcopy
 from docx import Document
 from fpdf import FPDF
-from os import path, mkdir
+from os import path, makedirs
+from pdf2image import pdfinfo_from_bytes, convert_from_bytes
 from PIL import Image
+from typing import List, Tuple
 from uuid import uuid4
 import aiofiles
 import io
 
 
-async def background_write_file(file_buffer: bytes, file_name: str):
+async def background_write_file_images(file_buffer: bytes, file_name: str)\
+    -> Tuple[Image.Image, dict]:
     """
-    Retrieves image metadata from buffer and saves image to local storage.
-    Updates image of id `id` with properties retrieved from metadata & local
-    storage path.
+    Retrieves image metadata from image buffer and saves image to local
+    storage.
+
+    Args:
+        file_buffer (bytes): image file as bytes
+        file_name (str): uploaded image's file name
+
+    Returns:
+        (tuple[PIL.Image, dict]): a tuple of image loaded as a PIL Image object
+            and a dictionary containing image metadata.
     """
-    storage_path = settings.STORAGE_PATH
+    # set storage path to `images` folder
+    storage_path = path.join(settings.STORAGE_PATH, 'images')
+
     # check if storage path exists & is a directory. If not create one.
     if not (path.isdir(storage_path) or path.exists(storage_path)):
         print(f"Directory doesn't exist at given path: '{storage_path}'")
-        mkdir(storage_path)
+        makedirs(storage_path)
         print(f"Created storage directory: '{storage_path}")
 
     # set local file name by appending uuid value before the extension.
@@ -52,6 +64,75 @@ async def background_write_file(file_buffer: bytes, file_name: str):
         await new_image_file.write(file_buffer)
 
     return image, image_dict
+
+
+async def background_write_file_pdf(file_buffer: bytes, file_name: str)\
+    -> Tuple[List[Image.Image], dict]:
+    """
+    Retrieves pdf metadata from pdf buffer and saves pdf to local storage.
+
+    Args:
+        file_buffer (bytes): pdf file as bytes
+        file_name (str): uploaded pdf's file name
+
+    Returns:
+        (tuple[list[PIL.Image], dict]): a tuple of a list of pdf's pages loaded
+            as as PIL Image objects and a dictionary containing pdf metadata.
+    """
+    # set storage path to `pdfs` folder
+    storage_path = path.join(settings.STORAGE_PATH, 'pdfs')
+
+    # check if storage path exists & is a directory. If not create one.
+    if not (path.isdir(storage_path) or path.exists(storage_path)):
+        print(f"Directory doesn't exist at given path: '{storage_path}'")
+        makedirs(storage_path)
+        print(f"Created storage directory: '{storage_path}")
+
+    # set local file name by appending uuid value before the extension (pdf).
+    base_name, ext = path.splitext(file_name)
+    local_file_name = f'{base_name}_{uuid4()}{ext}'
+
+    # set absolute local storage path by appending file name to storage path
+    file_path = path.join(path.abspath(storage_path), local_file_name)
+
+    # get pdf info
+    pdf_info_dict = pdfinfo_from_bytes(file_buffer)
+
+    pdf_dict = {
+        "local_path": file_path,
+        'producer': pdf_info_dict['Producer'],
+        'no_pages': pdf_info_dict['Pages'],
+        'page_size': pdf_info_dict['Page size'],
+        'file_size': pdf_info_dict['File size'],
+        'pdf_version': pdf_info_dict['PDF version'],
+    }
+
+    # load pdf pages as PIL.Image objects
+    pdf_images = convert_from_bytes(file_buffer, fmt='jpeg')
+
+    # # get image related info for each page
+    # pages_info = {}
+    # for i, image in enumerate(pdf_images):
+    #     # remove unnecessary info that causes errors for large png files
+    #     info = deepcopy(image.info)
+    #     info.pop('icc_profile', None)
+
+    #     # get image metadata and update image in db with it
+    #     image_dict = {
+    #         
+    #         "image_size": image.size,
+    #         "image_format": image.format,
+    #         "image_mode": image.mode,
+    #         "info": info,
+    #         }
+    #     pages_info[str(i + 1)] = image_dict
+    # pdf_dict['pages_info'] = pages_info
+
+    # save pdf to local storage asynchronously and return pdf_images & dict
+    async with aiofiles.open(file_path, 'wb') as new_pdf_file:
+        await new_pdf_file.write(file_buffer)
+
+    return pdf_images, pdf_dict
 
 
 async def background_write_ocr_result(

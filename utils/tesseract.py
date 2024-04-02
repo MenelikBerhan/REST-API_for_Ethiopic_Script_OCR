@@ -222,10 +222,10 @@ async def background_run_tesseract_pdf(
             }
 
         for i, image in enumerate(pdf_images):
-            # before running OCR on a new image, wait for previous one to finish.
-            # if added immediately, executor won't return until all images are done
+            # before running OCR on next page, wait for previous one to finish.
+            # if not waited, executor won't return until all pages are done
             while OCR_IN_PROGRESS > 0:
-                await asyncio.sleep(2)  # TODO: check d/t sleep durations effect
+                await asyncio.sleep(2)  # TODO: check d/t sleep seconds effect
 
             OCR_IN_PROGRESS = OCR_IN_PROGRESS + 1
 
@@ -242,7 +242,7 @@ async def background_run_tesseract_pdf(
             # set time taken (TODO: use other counters & check d/ce)
             time_taken = time.perf_counter() - start
 
-            image.close()   # as precaution (side effect not clear if not closed)
+            image.close()   # as precaution (effect not clear if not closed)
 
             OCR_IN_PROGRESS = OCR_IN_PROGRESS - 1
 

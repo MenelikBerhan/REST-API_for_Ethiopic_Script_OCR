@@ -149,7 +149,6 @@ class ImageGetResponseModel(ImagePostResponseModel):
         default=None,
         description="__Result of OCR by tesseract in string form.__")
 
-
     # add config
     model_config = ConfigDict(
         json_schema_extra={

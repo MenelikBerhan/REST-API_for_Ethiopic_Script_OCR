@@ -113,7 +113,7 @@ class PdfGetResponseModel(PdfPostResponseModel):
         description='__Portable Document Format (PDF) version.__',
         examples=['1.7'])
 
-    no_pages : Union[int, None] = Field(
+    no_pages: Union[int, None] = Field(
         default=None,
         description='__Number of pages in the pdf.__'
     )

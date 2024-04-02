@@ -245,10 +245,14 @@ class TesseractOutputModelPdf(APIBaseModel):
                     '1': 'ከምስል ላይ የተለቀሙ የአማርኛ ፊደላት። ...',
                     '2': 'ኢትዮጵያ ትቅደም! ...'},
                 'ocr_result_dict': {
-                    '1': {'level': [1, 2], 'page_num': [1, 1], 'block_num': [0, 1],
-                    'par_num': [0, 0], 'line_num': [0, 1], 'word_num': [0, 1],
-                    'left': [0, 254], 'top': [0, 29], 'width': [644, 65],
-                    'height':  [56, 17], 'conf': [-1, 92], 'text': ['', 'ምንሊክ']}
+                    '1': {
+                        'level': [1, 2], 'page_num': [1, 1],
+                        'block_num': [0, 1], 'par_num': [0, 0],
+                        'line_num': [0, 1], 'word_num': [0, 1],
+                        'left': [0, 254], 'top': [0, 29],
+                        'width': [644, 65], 'height':  [56, 17],
+                        'conf': [-1, 92], 'text': ['', 'ምንሊክ']
+                    }
                 }
             }
         },  # type: ignore

@@ -3,7 +3,8 @@
 from bson import ObjectId
 from datetime import datetime, timezone
 from db.mongodb import db_client
-from utils.file_read_write import background_write_file_pdf
+from utils.file_read_write import background_write_file_pdf,\
+    background_write_ocr_result_pdf
 from utils.tesseract import background_setup_tess_config,\
     background_run_tesseract_pdf
 
@@ -29,7 +30,7 @@ async def background_pdf_ocr(
         )
     print('Image: WRITTEN 2 LOCAL')
 
-     # run tesseract in background & get output model dict & result text
+    # run tesseract in background & get output model dict & result text
     tess_output_dict = await background_run_tesseract_pdf(
         pdf_images, pdf_dict['id'], tess_config_dict
         )
@@ -46,19 +47,19 @@ async def background_pdf_ocr(
         # add it to update_dict also (to update pdf in db)
         pdf_update_dict['ocr_output_formats'] = pdf_dict[
             'ocr_output_formats']
-        
-    # # write OCR result to file (text, word or pdf)
-    # if any([fmt in pdf_dict['ocr_output_formats']
-    #         for fmt in ('txt', 'docx', 'pdf')]):
 
-    #     # write files and get their path
-    #     write_ocr_result_dict = await background_write_ocr_result_pdf(
-    #         pdf_update_dict['local_path'], pdf_dict, tess_output_dict
-    #     )
-    #     print(f"Result Saved in {list(write_ocr_result_dict.keys())} formats")
+    # write OCR result to file (text, word or pdf)
+    if any([fmt in pdf_dict['ocr_output_formats']
+            for fmt in ('txt', 'docx', 'pdf')]):
 
-    #     # add saved outptut formats to `done_output_formats`.
-    #     pdf_update_dict['done_output_formats'].update(write_ocr_result_dict)
+        # write files and get their path
+        write_ocr_result_dict = await background_write_ocr_result_pdf(
+            pdf_update_dict['local_path'], pdf_dict, tess_output_dict
+        )
+        print(f"Result Saved in {list(write_ocr_result_dict.keys())} formats")
+
+        # add saved outptut formats to `done_output_formats`.
+        pdf_update_dict['done_output_formats'].update(write_ocr_result_dict)
 
     # update pdf in db
     pdf_update_dict.update({

@@ -14,7 +14,7 @@ import io
 
 
 async def background_write_file_image(file_buffer: bytes, file_name: str)\
-    -> Tuple[Image.Image, dict]:
+        -> Tuple[Image.Image, dict]:
     """
     Retrieves image metadata from image buffer and saves image to local
     storage.
@@ -67,7 +67,7 @@ async def background_write_file_image(file_buffer: bytes, file_name: str)\
 
 
 async def background_write_file_pdf(file_buffer: bytes, file_name: str)\
-    -> Tuple[List[Image.Image], dict]:
+        -> Tuple[List[Image.Image], dict]:
     """
     Retrieves pdf metadata from pdf buffer and saves pdf to local storage.
 
@@ -109,24 +109,6 @@ async def background_write_file_pdf(file_buffer: bytes, file_name: str)\
 
     # load pdf pages as PIL.Image objects
     pdf_images = convert_from_bytes(file_buffer, fmt='jpeg')
-
-    # # get image related info for each page
-    # pages_info = {}
-    # for i, image in enumerate(pdf_images):
-    #     # remove unnecessary info that causes errors for large png files
-    #     info = deepcopy(image.info)
-    #     info.pop('icc_profile', None)
-
-    #     # get image metadata and update image in db with it
-    #     image_dict = {
-    #         
-    #         "image_size": image.size,
-    #         "image_format": image.format,
-    #         "image_mode": image.mode,
-    #         "info": info,
-    #         }
-    #     pages_info[str(i + 1)] = image_dict
-    # pdf_dict['pages_info'] = pages_info
 
     # save pdf to local storage asynchronously and return pdf_images & dict
     async with aiofiles.open(file_path, 'wb') as new_pdf_file:
@@ -202,6 +184,100 @@ async def background_write_ocr_result_image(
         # add new page & write text
         pdf.add_page()
         pdf.multi_cell(w=w, h=h, text=text)
+
+        # save pdf and set path in write_result_dict
+        pdf.output(pdf_file_path)
+        write_result_dict['pdf'] = pdf_file_path
+
+    return write_result_dict
+
+
+async def background_write_ocr_result_pdf(
+        pdf_path: str, pdf_dict: dict, tess_output_dict: dict
+        ):
+    """
+    Writes OCR result to files.
+
+    Args:
+        pdf_path (str): absolute path to pdf in local storage.
+        pdf_dict (dict): dictionary dump of pdf in database
+        tess_output_dict (dict): dictionary dump of OCR result in db
+    """
+    write_result_dict = {}
+
+    # footer do demarcate each page in the pdf
+    footer = '\n\t\t\t\t\t--- Page {} ---\n\n'
+
+    # use pdf file name in local storage for ocr output file name.
+    # Saves in same directory as pdf
+    base_name, _ = path.splitext(pdf_path)
+    text_by_page = tess_output_dict['ocr_result_text']
+
+    # write OCR result to a plain text file if not done already
+    if 'txt' in pdf_dict['ocr_output_formats'] and\
+            'txt' not in pdf_dict['done_output_formats']:
+
+        # set txt file path
+        txt_file_path = base_name + '.txt'
+
+        # concatenate texts from each page
+        text = ''
+        for page, page_text in text_by_page.items():
+            text += page_text + footer.format(page)
+
+        # write text to file & set path in write_result_dict
+        async with aiofiles.open(txt_file_path, 'w') as txt_file:
+            await txt_file.write(text)
+        write_result_dict['txt'] = txt_file_path
+
+    # write OCR result to a ms word (docx) file if not done already
+    if 'docx' in pdf_dict['ocr_output_formats'] and\
+            'docx' not in pdf_dict['done_output_formats']:
+        # set docx file path
+        docx_file_path = base_name + '.docx'
+
+        # create word document and add text to new paragraph for each page
+        document = Document()
+
+        for page, page_text in text_by_page.items():
+            # add footer to mark each page
+            text = page_text + footer.format(page)
+
+            par = document.add_paragraph().add_run(text)
+            # set font (must use official font name)
+            par.font.name = 'Abyssinica SIL'
+
+            document.add_page_break()
+
+        # save file and set path in write_result_dict
+        document.save(docx_file_path)
+        write_result_dict['docx'] = docx_file_path
+
+    # write OCR result to a pdf file if not done already
+    if 'pdf' in pdf_dict['ocr_output_formats'] and\
+            'pdf' not in pdf_dict['done_output_formats']:
+        # set pdf file path (add `-ocr` to distinguish from input pdf)
+        pdf_file_path = base_name + '-ocr.pdf'
+
+        # get font path & name, line width & height
+        font_path = './utils/fonts/AbyssinicaSIL-Regular.ttf'
+        font_name = 'Abyssinica SIL'    # can use custom font names
+        w, h = (0, 5)   # 0 width means use all available width
+
+        # create pdf document & set params
+        pdf = FPDF()
+        # set params
+        pdf.set_auto_page_break(True)
+        pdf.add_font(font_name, fname=font_path)
+        pdf.set_font(font_name)
+
+        # add new page & write text for each page of pdf ocr result
+        for page, page_text in text_by_page.items():
+            # add footer to mark each page
+            text = page_text + footer.format(page)
+
+            pdf.add_page()
+            pdf.multi_cell(w=w, h=h, text=text)
 
         # save pdf and set path in write_result_dict
         pdf.output(pdf_file_path)

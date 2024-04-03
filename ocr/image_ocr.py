@@ -10,8 +10,8 @@ from utils.tesseract import background_setup_tess_config,\
 
 
 async def background_image_ocr(
-        file_buffer: bytes, image_dict: dict, tess_req_dict: dict
-        ):
+    file_buffer: bytes, image_dict: dict, tess_req_dict: dict
+):
     """Performs OCR on image using background tasks.
 
     Args:
@@ -27,19 +27,19 @@ async def background_image_ocr(
     # save image in local storage & get image_dict (metadata & storage path)
     image, image_update_dict = await background_write_file_image(
         file_buffer, image_dict['name']
-        )
+    )
     print('Image: WRITTEN 2 LOCAL')
 
     # run tesseract in background & get output model dict & result text
     tess_output_dict = await background_run_tesseract_image(
         image, image_dict['id'], tess_config_dict
-        )
+    )
     print('Tesseract: OCR FINISHED')
 
     # add `str` output format to `done_output_formats`
     image_update_dict['done_output_formats'] = {
         'str': 'Set to Images `ocr_result_text` field.'
-        }
+    }
 
     # if str is not in output file formats list add it (default)
     if 'str' not in image_dict['ocr_output_formats']:
@@ -69,10 +69,10 @@ async def background_image_ocr(
         'tess_output_id': tess_output_dict['id'],
         "tess_config_id": tess_config_dict['id'],
         'updated_at': datetime.now(timezone.utc)
-        })
+    })
 
     await db_client.db.images.update_one(
         {'_id': ObjectId(image_dict['id'])},
         {'$set': image_update_dict},
         True   # upsert=True (update nested docs too. else replace inner docs.)
-        )
+    )

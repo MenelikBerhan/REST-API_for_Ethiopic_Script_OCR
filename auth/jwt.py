@@ -1,98 +1,77 @@
-#!/usr/bin/python3
-# pip install "python-jose[cryptography]"
-# pip install "passlib[bcrypt]"
-# openssl rand -hex 32
-
+"""
+Functions for authentication by jwt
+"""
+from config.setup import settings
 from datetime import datetime, timedelta, timezone
 from typing import Union
-
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
-from pydantic import BaseModel
+from models.token import TokenData
 from typing_extensions import Annotated
-
-from models.users import User, UserInDB, UserInLogin, UserInResponse
-from db.mongodb import db_client
-
-# to get a string like this run:
-# openssl rand -hex 32
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+from .utils import get_user
+from models.users import User
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
-
-# app = FastAPI()
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='users/login')
+"""OAuth2 flow to be used as a dependency for authentication.."""
 
 
-class TokenData(BaseModel):
-    username: Union[str, None] = None
-
-
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
-
-
-async def get_user(username: str):
-    user = await db_client.db.users.find_one({'username': username})
-    if user:
-        return UserInDB(**user)
-
-
-async def authenticate_user(username: str, password: str):
-    user = await get_user(username)
-    if not user:
-        return False
-    if not verify_password(password, user.hashed_password):
-        return False
-    return user
-
-
-def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
+def create_access_token(
+    data: dict, expires_delta: Union[timedelta, None] = None
+):
+    """Creates access token for username in data with expiration time."""
     to_encode = data.copy()
+
+    # set expiration time (if not set in config default 15mins)
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    # create a token based on username, secret key & algorithm
+    to_encode.update({'exp': expire})
+    encoded_jwt = jwt.encode(
+        to_encode, settings.AUTH_SECRET_KEY, algorithm=settings.AUTH_ALGORITHM
+        )
     return encoded_jwt
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    """Verifies given token and finds and returns the user associated."""
+    # exception to raise when authorization fails
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+        detail='Could not validate credentials',
+        headers={'WWW-Authenticate': 'Bearer'},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        # decode given token using predefined secret key & algorithm
+        payload = jwt.decode(
+            token, settings.AUTH_SECRET_KEY,
+            algorithms=[settings.AUTH_ALGORITHM]
+        )
+
+        # get user name from decoded payload
+        username: str = payload.get('sub')
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
-    except JWTError:
+
+    except JWTError:    # verification failed
         raise credentials_exception
+
+    # get and return user from db based on decoded username
     user = await get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
 
+
 async def get_current_active_user(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
+    """Checks if current user is disabled and returns it if not disabled."""
     if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail='Inactive user')
     return current_user

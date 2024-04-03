@@ -3,7 +3,7 @@
 # name of app
 APP_TITLE=REST-API for Ethiopic Script OCR
 # summary of app
-APP_SUMMARY=An OCR app for Images & PDFs containing Ethiopic Script.
+APP_SUMMARY=An OCR app for Images & PDFs containing Ethiopic Script
 # brief description of app
 APP_DESCRIPTION=
 # app debug mode

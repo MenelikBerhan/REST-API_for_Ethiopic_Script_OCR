@@ -1,11 +1,15 @@
 """Image endpoints
 """
+from auth.jwt import get_current_active_user
 from db.mongodb import db_client
-from fastapi import APIRouter, BackgroundTasks, Body, File, status, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, File, status,\
+    UploadFile
 from models.pdfs import PdfModel, PdfCollection, PdfPostRequestModel,\
     PdfPostResponseModel
 from models.tesseract import TesseractConfigRequestModel
+from models.users import User
 from ocr.pdf_ocr import background_pdf_ocr
+from typing_extensions import Annotated
 
 
 # create a router with `/pdf` prefix
@@ -18,8 +22,11 @@ pdf_router = APIRouter(prefix='/pdf')
     response_model=PdfCollection,
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    tags=['PDF']
 )
-async def list_pdfs():
+async def list_pdfs(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
     """
     ### List all of the pdfs in the database.
 
@@ -38,16 +45,19 @@ async def list_pdfs():
     status_code=status.HTTP_201_CREATED,
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    tags=['PDF']
 )
 async def create_pdf(
     background_tasks: BackgroundTasks,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     pdf_properties: PdfPostRequestModel = Body(default=None),
     tesseract_config: TesseractConfigRequestModel = Body(default=None),
     file: UploadFile = File(
         ...,
         description="""__Pdf file containing images (MAX 178956970 pixels)
-        to be OCR'ed__""")
-        ):
+        to be OCR'ed__"""
+    )
+):
     """
     ### Insert a new pdf record into the database, save pdf in local\
     storage and perform OCR in the background.
@@ -92,6 +102,6 @@ async def create_pdf(
         file_buffer,
         new_pdf_dict,
         tess_req_dict,
-        )
+    )
 
     return new_pdf_dict

@@ -1,10 +1,6 @@
 """Setup DB, Server and App settings
 """
-from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
-
-# load env variables from .env file
-load_dotenv()
 
 
 # class attributes will be read from env variables of same name
@@ -37,9 +33,19 @@ class FileSettings(BaseSettings):
     STORAGE_PATH: str
 
 
-class Settings(AppSettings, ServerSettings, DbSettings, FileSettings):
+class AuthSettings(BaseSettings):
+    """For user authentication"""
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    AUTH_SECRET_KEY: str
+    """use `openssl rand -hex 32` to generate key."""
+    AUTH_ALGORITHM: str
+
+
+class Settings(
+    AppSettings, ServerSettings, DbSettings, FileSettings, AuthSettings
+        ):
     """Container for all settings."""
     pass
 
 
-settings = Settings(_env_file='.env')
+settings = Settings(_env_file='config/app_env')

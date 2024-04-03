@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from api.v1.routes.images import image_router
 from api.v1.routes.ocr import ocr_router
 from api.v1.routes.pdfs import pdf_router
+from api.v1.routes.users import users_router
 import uvicorn
 
 # create fastapi app
@@ -14,7 +15,7 @@ app = FastAPI(
     title=settings.APP_TITLE,
     summary=settings.APP_SUMMARY,
     description=settings.APP_DESCRIPTION
-    )
+)
 
 
 # connect & disconnect dbclient on app startup & shutdown
@@ -25,6 +26,7 @@ app.add_event_handler('shutdown', db_client.disconnect)
 app.include_router(image_router)
 app.include_router(ocr_router)
 app.include_router(pdf_router)
+app.include_router(users_router)
 
 
 if __name__ == '__main__':

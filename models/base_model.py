@@ -28,16 +28,19 @@ class APIBaseModel(BaseModel):
     id: Optional[PyObjectId] = Field(
         alias='_id',
         default=None,
-        description='__Unique identifying string.__')
+        description='__Unique identifying string.__'
+    )
 
     # created & updated time stamp with timezone
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        description='__Object creation time stamp.__')
+        description='__Object creation time stamp.__'
+    )
 
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        description='__Time stamp for last update on object.__')
+        description='__Time stamp for last update on object.__'
+    )
 
     # configure Pydantic behaviour. (by name not to use aliase)
     model_config = ConfigDict(

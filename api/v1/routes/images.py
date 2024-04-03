@@ -1,11 +1,15 @@
 """Image endpoints
 """
+from auth.jwt import get_current_active_user
 from db.mongodb import db_client
-from fastapi import APIRouter, BackgroundTasks, Body, File, status, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Body, File, Depends, status,\
+    UploadFile
 from models.images import ImageModel, ImageCollection, ImagePostRequestModel,\
     ImagePostResponseModel
+from models.users import User
 from models.tesseract import TesseractConfigRequestModel
 from ocr.image_ocr import background_image_ocr
+from typing_extensions import Annotated
 
 
 # create a router with `/images` prefix
@@ -18,8 +22,11 @@ image_router = APIRouter(prefix='/image')
     response_model=ImageCollection,
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    tags=['Image']
 )
-async def list_images():
+async def list_images(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
     """
     ### List all of the images in the database.
 
@@ -38,13 +45,18 @@ async def list_images():
     status_code=status.HTTP_201_CREATED,
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    tags=['Image']
 )
 async def create_image(
     background_tasks: BackgroundTasks,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     image_properties: ImagePostRequestModel = Body(default=None),
     tesseract_config: TesseractConfigRequestModel = Body(default=None),
-    file: UploadFile = File(...,
-                            description='__Image (MAX 178956970 pixels)__')):
+    file: UploadFile = File(
+        ...,
+        description='__Image (MAX 178956970 pixels)__'
+    )
+):
     """
     ### Insert a new image record into the database, save image in local\
     storage and perform OCR in the background.
@@ -89,6 +101,6 @@ async def create_image(
         file_buffer,
         new_image_dict,
         tess_req_dict,
-        )
+    )
 
     return new_image_dict

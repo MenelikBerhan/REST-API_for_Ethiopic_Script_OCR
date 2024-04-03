@@ -85,7 +85,8 @@ class ImagePostResponseModel(ImagePostRequestModel, APIBaseModel):
 
     ocr_finished: bool = Field(
         default=False,
-        description='__True if background task performing OCR is finished.__')
+        description='__True if background task performing OCR is finished.__'
+    )
 
     # add config
     model_config = ConfigDict(
@@ -112,12 +113,14 @@ class ImageGetResponseModel(ImagePostResponseModel):
     image_size: Union[Tuple[int, int], None] = Field(
         default=None,
         description='__`(width, height)` of the image in pixles.__',
-        examples=[(909, 526)])
+        examples=[(909, 526)]
+    )
 
     image_format: Union[str, None] = Field(
         default=None,
         description='__Type of image file.__',
-        examples=['PNG', 'JPEG', 'TIFF', 'GIF', 'BMP'])
+        examples=['PNG', 'JPEG', 'TIFF', 'GIF', 'BMP']
+    )
 
     image_mode: Union[str, None] = Field(
         default=None,
@@ -128,17 +131,21 @@ class ImageGetResponseModel(ImagePostResponseModel):
             'P (8-bit pixels, mapped to any other mode using a color palette)',
             'RGB (3x8-bit pixels, true color)',
             'RGBA (4x8-bit pixels, true color with transparency mask)',
-            'CMYK (4x8-bit pixels, color separation)'])
+            'CMYK (4x8-bit pixels, color separation)'
+        ]
+    )
 
     # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
     tess_config_id: Union[PyObjectId, None] = Field(
         default=None,
-        description='__Id of tesseract configuration used for OCR.__')
+        description='__Id of tesseract configuration used for OCR.__'
+    )
 
     # id of TesseractOutputModel (`str` in model & `ObjectId` in db)
     tess_output_id: Union[PyObjectId, None] = Field(
         default=None,
-        description='__Id of tesseract output containing OCR results.__')
+        description='__Id of tesseract output containing OCR results.__'
+    )
 
     ocr_accuracy: Union[float, None] = Field(
         default=None,
@@ -147,7 +154,8 @@ class ImageGetResponseModel(ImagePostResponseModel):
 
     ocr_result_text: Union[str, None] = Field(
         default=None,
-        description="__Result of OCR by tesseract in string form.__")
+        description="__Result of OCR by tesseract in string form.__"
+    )
 
     # add config
     model_config = ConfigDict(
@@ -178,7 +186,8 @@ class ImageModel(ImageGetResponseModel):
     """
     # fields not in response model (but stored in db)
     local_path: Union[str, None] = Field(
-        default=None, description='__Local storage path of image.__')
+        default=None, description='__Local storage path of image.__'
+    )
 
     info: Union[dict, None] = Field(
         default=None,
@@ -186,7 +195,9 @@ class ImageModel(ImageGetResponseModel):
         examples=[
             {'srgb': 0, 'gamma': 0.45455, 'dpi': (95.9866, 95.9866)},
             {'jfif': 257, 'jfif_version': (1, 1), 'jfif_unit': 0,
-             'jfif_density': (1, 1)}])
+             'jfif_density': (1, 1)}
+        ]
+    )
 
     done_output_formats: Dict[OcrOutputFormat, str] = Field(
         default={},

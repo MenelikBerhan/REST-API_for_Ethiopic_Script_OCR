@@ -13,7 +13,7 @@ from .utils import get_user
 from models.users import User
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='users/login')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='user/login')
 """OAuth2 flow to be used as a dependency for authentication.."""
 
 

@@ -63,6 +63,7 @@ async def login_user(
     # retrieve user from db using given username & password
     user = await authenticate_user(form_data.username, form_data.password)
     if not user:
+        # header key `WWW-Authenticate` based on OAuth2 specification
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Incorrect username or password',
@@ -73,6 +74,7 @@ async def login_user(
     access_token_expires = timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
+    # key `sub` based on OAuth2 specification
     access_token = create_access_token(
         data={'sub': user.username}, expires_delta=access_token_expires
     )

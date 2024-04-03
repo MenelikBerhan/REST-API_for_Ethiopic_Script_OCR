@@ -68,17 +68,19 @@ async def background_setup_tess_config(tess_req_dict: dict) -> dict:
         'load_freq_dawg': 0,
         'textord_space_size_is_variable': 1,
         'preserve_interword_spaces': 1
-        }
+    }
 
     # set CONFIGVARs in tess_req_dict with default values (if not set already)
     tess_req_dict['config_vars'].update(
         {k: v for k, v in default_config_vars.items()
-         if k not in tess_req_dict['config_vars']})
+         if k not in tess_req_dict['config_vars']}
+    )
 
     # sort items in the nested dictionary `config_vars` since mongodb uses
     # field order in nested documents (dicts) for equality matches
     tess_req_dict['config_vars'] = dict(
-        sorted(tess_req_dict['config_vars'].items()))
+        sorted(tess_req_dict['config_vars'].items())
+    )
 
     # check if a TesseractConfigModel already exist in db for given params
     config_dict = await db_client.db.tess_config.find_one(tess_req_dict)
@@ -104,7 +106,8 @@ OCR_IN_PROGRESS: int = 0
 
 
 async def background_run_tesseract_image(
-        image: Image, image_id: str, tess_config_dict: dict):
+    image: Image, image_id: str, tess_config_dict: dict
+):
     """
     Runs tesseract in a ThreadPool and returns the result.
 
@@ -120,10 +123,12 @@ async def background_run_tesseract_image(
     global OCR_IN_PROGRESS
 
     # set tesseract config string from config_dict
-    config = '-l {} --psm {} --oem {}'.format(
+    config = '-l {} --psm {} --oem {} --tessdata-dir "{}"'.format(
         tess_config_dict['language'],
         tess_config_dict['psm'],
-        tess_config_dict['oem'])
+        tess_config_dict['oem'],
+        settings.TESSDATA_PREFIX
+    )
 
     for key, value in tess_config_dict['config_vars'].items():
         config += ' -c {}={}'.format(key, value)
@@ -149,8 +154,8 @@ async def background_run_tesseract_image(
             pool,
             lambda: pts.image_to_data(
                 image, config=config, output_type=pts.Output.DICT
-                )
             )
+        )
 
         # set time taken (TODO: use other counters & check d/ce)
         time_taken = time.perf_counter() - start
@@ -184,7 +189,8 @@ async def background_run_tesseract_image(
 
 
 async def background_run_tesseract_pdf(
-        pdf_images: List[Image], pdf_id: str, tess_config_dict: dict):
+    pdf_images: List[Image], pdf_id: str, tess_config_dict: dict
+):
     """
     Runs tesseract in a ThreadPool and returns the result.
 
@@ -200,10 +206,12 @@ async def background_run_tesseract_pdf(
     global OCR_IN_PROGRESS
 
     # set tesseract config string from config_dict
-    config = '-l {} --psm {} --oem {}'.format(
+    config = '-l {} --psm {} --oem {} --tessdata-dir "{}"'.format(
         tess_config_dict['language'],
         tess_config_dict['psm'],
-        tess_config_dict['oem'])
+        tess_config_dict['oem'],
+        settings.TESSDATA_PREFIX
+    )
 
     for key, value in tess_config_dict['config_vars'].items():
         config += ' -c {}={}'.format(key, value)
@@ -219,7 +227,7 @@ async def background_run_tesseract_pdf(
         pages_ocr_result = {
             'time_taken': {}, 'ocr_result_text': {},
             'ocr_result_dict': {}, 'ocr_accuracy': {}
-            }
+        }
 
         for i, image in enumerate(pdf_images):
             # before running OCR on next page, wait for previous one to finish.
@@ -236,8 +244,8 @@ async def background_run_tesseract_pdf(
                 pool,
                 lambda: pts.image_to_data(
                     image, config=config, output_type=pts.Output.DICT
-                    )
                 )
+            )
 
             # set time taken (TODO: use other counters & check d/ce)
             time_taken = time.perf_counter() - start

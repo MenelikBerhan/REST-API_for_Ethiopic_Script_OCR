@@ -37,7 +37,17 @@ class FileSettings(BaseSettings):
     STORAGE_PATH: str
 
 
-class Settings(AppSettings, ServerSettings, DbSettings, FileSettings):
+class AuthSettings(BaseSettings):
+    """For user authentication"""
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    AUTH_SECRET_KEY: str
+    """use `openssl rand -hex 32` to generate key."""
+    AUTH_ALGORITHM: str
+
+
+class Settings(
+    AppSettings, ServerSettings, DbSettings, FileSettings, AuthSettings
+        ):
     """Container for all settings."""
     pass
 

@@ -1,15 +1,17 @@
 """Ocr endpoints
 """
-from bson import ObjectId
-from bson.errors import InvalidId
+from auth.jwt import get_current_active_user
 from datetime import datetime, timezone
 from db.mongodb import db_client
-from fastapi import APIRouter, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from fastapi.responses import FileResponse, JSONResponse
 from models.images import OcrOutputFormat
 from models.pdfs import OcrOutputFormat as PdfOcrOutputFormat
+from models.users import User
 from os import path
 from typing import List
+from typing_extensions import Annotated
+from utils.crud import get_image_by_id, get_pdf_by_id
 from utils.file_read_write import background_write_ocr_result_image,\
     background_write_ocr_result_pdf
 
@@ -18,51 +20,15 @@ from utils.file_read_write import background_write_ocr_result_image,\
 ocr_router = APIRouter(prefix='/ocr')
 
 
-async def get_image_by_id(image_id: str) -> dict:
-    """Find & return image from db based on id."""
-    # retrieve image from db
-    try:
-        image = await db_client.db.images.find_one({'_id': ObjectId(image_id)})
-    except InvalidId:   # handle invalid ObjectId string
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
-            f"""InvalidId: '{image_id}' is not a valid ObjectId, it must be \
-a 12-byte input or a 24-character hex string""")
-
-    if image is None:   # image not found in db
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            f"Image with given id: '{image_id}' doesn't exist.")
-
-    return image
-
-
-async def get_pdf_by_id(pdf_id: str) -> dict:
-    """Find & return pdf from db based on id."""
-    # retrieve pdf from db
-    try:
-        pdf = await db_client.db.pdfs.find_one({'_id': ObjectId(pdf_id)})
-    except InvalidId:   # handle invalid ObjectId string
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
-            f"""InvalidId: '{pdf_id}' is not a valid ObjectId, it must be \
-a 12-byte input or a 24-character hex string""")
-
-    if pdf is None:   # pdf not found in db
-        raise HTTPException(
-            status.HTTP_404_NOT_FOUND,
-            f"Pdf with given id: '{pdf_id}' doesn't exist.")
-
-    return pdf
-
-
 @ocr_router.get(
     '/image/done/{image_id}',
     response_description='__List of Finished OCR output formats__',
     tags=['Image', 'OCR']
 )
-async def get_image_ocr_output_file_formats(image_id: str)\
-        -> List[OcrOutputFormat]:
+async def get_image_ocr_output_file_formats(
+    image_id: str,
+    current_user: Annotated[User, Depends(get_current_active_user)]
+) -> List[OcrOutputFormat]:
     """
     ### List of file formats the OCR result is already saved in.<br>\
     Output file is readily available for file formats in the response list.\
@@ -83,8 +49,10 @@ async def get_image_ocr_output_file_formats(image_id: str)\
     response_description='__List of Finished OCR output formats__',
     tags=['PDF', 'OCR']
 )
-async def get_pdf_ocr_output_file_formats(pdf_id: str)\
-        -> List[PdfOcrOutputFormat]:
+async def get_pdf_ocr_output_file_formats(
+    pdf_id: str,
+    current_user: Annotated[User, Depends(get_current_active_user)]
+) -> List[PdfOcrOutputFormat]:
     """
     ### List of file formats the OCR result is already saved in.<br>\
     Output file is readily available for file formats in the response list.\
@@ -108,6 +76,7 @@ async def get_pdf_ocr_output_file_formats(pdf_id: str)\
 )
 async def get_image_ocr_result(
     image_id: str,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     format: OcrOutputFormat = Query(
         default='str',
         description="__File format of image's OCR result__"
@@ -189,6 +158,7 @@ to `True`.")
 )
 async def get_pdf_ocr_result(
     pdf_id: str,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     format: OcrOutputFormat = Query(
         default='str',
         description="__File format of pdf's OCR result__"

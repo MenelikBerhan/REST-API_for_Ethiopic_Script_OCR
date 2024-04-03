@@ -1,11 +1,15 @@
 """Image endpoints
 """
+from auth.jwt import get_current_active_user
 from db.mongodb import db_client
-from fastapi import APIRouter, BackgroundTasks, Body, File, status, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Body, File, Depends, status,\
+    UploadFile
 from models.images import ImageModel, ImageCollection, ImagePostRequestModel,\
     ImagePostResponseModel
+from models.users import User
 from models.tesseract import TesseractConfigRequestModel
 from ocr.image_ocr import background_image_ocr
+from typing_extensions import Annotated
 
 
 # create a router with `/images` prefix
@@ -20,7 +24,9 @@ image_router = APIRouter(prefix='/image')
     response_model_exclude_none=True,
     tags=['Image']
 )
-async def list_images():
+async def list_images(
+    current_user: Annotated[User, Depends(get_current_active_user)]
+):
     """
     ### List all of the images in the database.
 
@@ -43,6 +49,7 @@ async def list_images():
 )
 async def create_image(
     background_tasks: BackgroundTasks,
+    current_user: Annotated[User, Depends(get_current_active_user)],
     image_properties: ImagePostRequestModel = Body(default=None),
     tesseract_config: TesseractConfigRequestModel = Body(default=None),
     file: UploadFile = File(

@@ -15,7 +15,7 @@ app = FastAPI(
     title=settings.APP_TITLE,
     summary=settings.APP_SUMMARY,
     description=settings.APP_DESCRIPTION
-    )
+)
 
 
 # connect & disconnect dbclient on app startup & shutdown

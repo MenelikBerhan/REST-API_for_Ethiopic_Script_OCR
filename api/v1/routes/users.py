@@ -1,18 +1,18 @@
 """Image endpoints
 """
-from config.setup import settings
-from db.mongodb import db_client
-from fastapi import APIRouter, Body, Depends, status, HTTPException
-from models.token import Token
-from models.users import User, UserInCreate, UserInDB, UserInResponse
-from auth.jwt import create_access_token, get_current_active_user
 from auth.utils import authenticate_user, check_free_username_and_email,\
     get_password_hash
-from fastapi.security import OAuth2PasswordRequestForm
-from typing_extensions import Annotated
+from auth.jwt import create_access_token, get_current_active_user
+from config.setup import settings
 from datetime import timedelta
+from db.mongodb import db_client
+from fastapi import APIRouter, Body, Depends, status, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from models.token import Token
+from models.users import User, UserInCreate, UserInDB, UserInResponse
+from typing_extensions import Annotated
 
-# create a router with `/pdf` prefix
+# create a router with `/user` prefix
 users_router = APIRouter(prefix='/user')
 
 
@@ -21,12 +21,13 @@ users_router = APIRouter(prefix='/user')
     response_model=UserInResponse,
     tags=['authentication'],
     status_code=status.HTTP_201_CREATED,
+    response_description='__Created User__'
 )
-async def register(
+async def register_user(
         user: UserInCreate = Body(...)
 ):
     """
-    Register user
+    ### Register user
     """
     # check if any user exists with given username & password.
     # if found raises HTTP exception
@@ -50,14 +51,14 @@ async def register(
 @users_router.post(
     '/login',
     tags=['authentication'],
-    response_model=Token
+    response_model=Token,
+    response_description='__Access Token__'
 )
-async def login_for_access_token(
+async def login_user(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
     """
-    Logs in a user based on username & password, by creating and returning
-    access token with expiration time.
+    ### Logs in a user based on username & password.
     """
     # retrieve user from db using given username & password
     user = await authenticate_user(form_data.username, form_data.password)
@@ -82,12 +83,13 @@ async def login_for_access_token(
 @users_router.get(
         '/me/',
         response_model=UserInResponse,
-        tags=['authentication']
-    )
-async def read_users_me(
+        tags=['authentication'],
+        response_description='__Current User__'
+)
+async def get_current_user(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
     """
-    Get current user based on token in header.
+    ### Get current user.
     """
     return current_user

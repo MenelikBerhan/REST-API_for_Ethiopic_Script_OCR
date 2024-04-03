@@ -18,6 +18,7 @@ pdf_router = APIRouter(prefix='/pdf')
     response_model=PdfCollection,
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    tags=['PDF']
 )
 async def list_pdfs():
     """
@@ -38,6 +39,7 @@ async def list_pdfs():
     status_code=status.HTTP_201_CREATED,
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    tags=['PDF']
 )
 async def create_pdf(
     background_tasks: BackgroundTasks,
@@ -46,8 +48,9 @@ async def create_pdf(
     file: UploadFile = File(
         ...,
         description="""__Pdf file containing images (MAX 178956970 pixels)
-        to be OCR'ed__""")
-        ):
+        to be OCR'ed__"""
+    )
+):
     """
     ### Insert a new pdf record into the database, save pdf in local\
     storage and perform OCR in the background.
@@ -92,6 +95,6 @@ async def create_pdf(
         file_buffer,
         new_pdf_dict,
         tess_req_dict,
-        )
+    )
 
     return new_pdf_dict

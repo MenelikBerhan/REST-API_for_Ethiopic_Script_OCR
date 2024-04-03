@@ -59,6 +59,7 @@ a 12-byte input or a 24-character hex string""")
 @ocr_router.get(
     '/image/done/{image_id}',
     response_description='__List of Finished OCR output formats__',
+    tags=['Image', 'OCR']
 )
 async def get_image_ocr_output_file_formats(image_id: str)\
         -> List[OcrOutputFormat]:
@@ -80,6 +81,7 @@ async def get_image_ocr_output_file_formats(image_id: str)\
 @ocr_router.get(
     '/pdf/done/{pdf_id}',
     response_description='__List of Finished OCR output formats__',
+    tags=['PDF', 'OCR']
 )
 async def get_pdf_ocr_output_file_formats(pdf_id: str)\
         -> List[PdfOcrOutputFormat]:
@@ -101,21 +103,23 @@ async def get_pdf_ocr_output_file_formats(pdf_id: str)\
 @ocr_router.get(
     '/image/{image_id}',
     response_description="__Image's OCR result__",
-    response_class=FileResponse
+    response_class=FileResponse,
+    tags=['Image', 'OCR']
 )
 async def get_image_ocr_result(
     image_id: str,
     format: OcrOutputFormat = Query(
         default='str',
         description="__File format of image's OCR result__"
-        ),
+    ),
     add_format: bool = Query(
         default=False,
         description="""__If OCR output is not already saved in given format,
         Save OCR output in given format and add it to list of
         `ocr_output_formats` field of the image.__
         """
-        )):
+    )
+):
     """
     ### Get images OCR result as a string or a file.
     """
@@ -144,7 +148,7 @@ to `True`.")
         )
         print(
             f"Result Saved in {list(write_ocr_result_dict.keys())} format."
-            )
+        )
 
         # update `done_output_formats` dict in image (not saved in db)
         image['done_output_formats'].update(write_ocr_result_dict)
@@ -166,7 +170,7 @@ to `True`.")
         await db_client.db.images.update_one(
             {'_id': image['_id']},
             {'$set': image_update_dict},
-            )
+        )
 
     # set output file name from image name
     base_name, _ = path.splitext(image['name'])
@@ -174,27 +178,29 @@ to `True`.")
 
     return FileResponse(
         image['done_output_formats'][format], filename=output_file_name
-        )
+    )
 
 
 @ocr_router.get(
     '/pdf/{pdf_id}',
     response_description="__Pdf's OCR result__",
-    response_class=FileResponse
+    response_class=FileResponse,
+    tags=['PDF', 'OCR']
 )
 async def get_pdf_ocr_result(
     pdf_id: str,
     format: OcrOutputFormat = Query(
         default='str',
         description="__File format of pdf's OCR result__"
-        ),
+    ),
     add_format: bool = Query(
         default=False,
         description="""__If OCR output is not already saved in given format,
         Save OCR output in given format and add it to list of
         `ocr_output_formats` field of the pdf.__
         """
-        )):
+    )
+):
     """
     ### Get pdfs OCR result as a string or a file.
     """
@@ -223,7 +229,7 @@ to `True`.")
         )
         print(
             f"Result Saved in {list(write_ocr_result_dict.keys())} format."
-            )
+        )
 
         # update `done_output_formats` dict in pdf (not saved in db)
         pdf['done_output_formats'].update(write_ocr_result_dict)
@@ -245,7 +251,7 @@ to `True`.")
         await db_client.db.pdfs.update_one(
             {'_id': pdf['_id']},
             {'$set': pdf_update_dict},
-            )
+        )
 
     # set output file name from pdf name
     base_name, _ = path.splitext(pdf['name'])
@@ -253,4 +259,4 @@ to `True`.")
 
     return FileResponse(
         pdf['done_output_formats'][format], filename=output_file_name
-        )
+    )

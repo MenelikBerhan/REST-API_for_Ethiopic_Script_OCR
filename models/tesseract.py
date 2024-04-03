@@ -47,15 +47,18 @@ class TesseractConfigRequestModel(BaseModel):
 
     language: Language = Field(
         default=Language.amharic_old,
-        description='__Tesseract language model to use for OCR.__')
+        description='__Tesseract language model to use for OCR.__'
+    )
 
     oem: int = Field(
         default=1, ge=0, le=3,
-        description='__OCR engine mode used by tesserat.__')
+        description='__OCR engine mode used by tesserat.__'
+    )
 
     psm: int = Field(
         default=3, ge=0, le=13,
-        description='__Page segmentation mode used by tesseract.__')
+        description='__Page segmentation mode used by tesseract.__'
+    )
 
     # additional custom configuration flags
     # TODO: validate key names by cross checking with tesseract_parameters file
@@ -150,7 +153,7 @@ class TesseractOutputModelImage(APIBaseModel):
     ocr_result_text: str = Field(
         ...,
         description="OCR result in string form."
-        )
+    )
 
     ocr_result_dict: Dict[str, Union[List[int], List[str]]] = Field(
         ...,
@@ -218,7 +221,7 @@ class TesseractOutputModelPdf(APIBaseModel):
     ocr_result_text: Dict[str, str] = Field(
         ...,
         description="OCR result in string form for each page."
-        )
+    )
 
     ocr_result_dict: Dict[str, Dict[str, Union[List[int], List[str]]]] = Field(
         ...,

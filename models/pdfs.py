@@ -39,7 +39,8 @@ class PdfPostRequestModel(BaseModel):
     """
     # pdf fields to be set from request body
     description: str = Field(
-        default='', description='__Brief description of the pdf.__')
+        default='', description='__Brief description of the pdf.__'
+    )
 
     ocr_output_formats: List[OcrOutputFormat] = Field(
         default=['str'], min_length=1,
@@ -85,7 +86,8 @@ class PdfPostResponseModel(PdfPostRequestModel, APIBaseModel):
 
     ocr_finished: bool = Field(
         default=False,
-        description='__True if background task performing OCR is finished.__')
+        description='__True if background task performing OCR is finished.__'
+    )
 
     # add config
     model_config = ConfigDict(
@@ -111,7 +113,8 @@ class PdfGetResponseModel(PdfPostResponseModel):
     pdf_version: Union[str, None] = Field(
         default=None,
         description='__Portable Document Format (PDF) version.__',
-        examples=['1.7'])
+        examples=['1.7']
+    )
 
     no_pages: Union[int, None] = Field(
         default=None,
@@ -121,12 +124,14 @@ class PdfGetResponseModel(PdfPostResponseModel):
     file_size: Union[str, None] = Field(
         default=None,
         description='__Size of pdf file in bytes.__',
-        examples=['676660 bytes'])
+        examples=['676660 bytes']
+    )
 
     page_size: Union[str, None] = Field(
         default=None,
         description='__Size of pdf pages in points (1 pts = 1/72 inch).__',
-        examples=['841.92 x 1190.52 pts (A3)'])
+        examples=['841.92 x 1190.52 pts (A3)']
+    )
 
     producer: Union[str, None] = Field(
         default=None,
@@ -136,12 +141,14 @@ class PdfGetResponseModel(PdfPostResponseModel):
     # id of TesseractConfigurationModel (`str` in model & `ObjectId` in db)
     tess_config_id: Union[PyObjectId, None] = Field(
         default=None,
-        description='__Id of tesseract configuration used for OCR.__')
+        description='__Id of tesseract configuration used for OCR.__'
+    )
 
     # id of TesseractOutputModel (`str` in model & `ObjectId` in db)
     tess_output_id: Union[PyObjectId, None] = Field(
         default=None,
-        description='__Id of tesseract output containing OCR results.__')
+        description='__Id of tesseract output containing OCR results.__'
+    )
 
     # average confidence of recognized words for each page
     ocr_accuracy: Union[Dict[str, float], None] = Field(
@@ -188,19 +195,14 @@ class PdfModel(PdfGetResponseModel):
     """
     # fields not in response model (but stored in db)
     local_path: Union[str, None] = Field(
-        default=None, description='__Local storage path of the pdf.__')
+        default=None, description='__Local storage path of the pdf.__'
+    )
 
     done_output_formats: Dict[OcrOutputFormat, str] = Field(
         default={},
         description="""Key value pair of saved output file formats
         and their path in local storage."""
     )
-
-    # # image related info about each page
-    # pages_info: Union[Dict[str, Dict[str, Any]], None] = Field(
-    #     default=None,
-    #     description="__Image related info about pdf's pages.__"
-    # )
 
     # add config
     model_config = ConfigDict(

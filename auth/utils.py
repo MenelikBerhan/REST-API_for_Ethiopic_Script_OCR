@@ -43,13 +43,13 @@ async def check_free_username_and_email(username, email):
     user = await db_client.db.users.find_one({'username': username})
     if user:
         raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail='User with this username already exists',
-            )
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail='User with this username already exists',
+        )
 
     user = await db_client.db.users.find_one({'email': email})
     if user:
         raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail='User with this email already exists',
-            )
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail='User with this email already exists',
+        )

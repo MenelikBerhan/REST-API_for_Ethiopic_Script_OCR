@@ -71,6 +71,9 @@ async def background_setup_tess_config(tess_req_dict: dict) -> dict:
     }
 
     # set CONFIGVARs in tess_req_dict with default values (if not set already)
+    if tess_req_dict.get('config_vars') is None:
+        tess_req_dict['config_vars'] = {}
+
     tess_req_dict['config_vars'].update(
         {k: v for k, v in default_config_vars.items()
          if k not in tess_req_dict['config_vars']}

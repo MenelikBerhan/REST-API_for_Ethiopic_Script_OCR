@@ -86,7 +86,9 @@ async def create_image(
     new_image_dict['id'] = insert_result.inserted_id
 
     # get a dictionary of tesseract params from request body
-    tess_req_dict = tesseract_config.model_dump()
+    tess_req_dict = {}
+    if tesseract_config:
+        tess_req_dict = tesseract_config.model_dump()
 
     # read file into buffer & pass buffer to background tasks.
     # can't pass file directly, it is closed before processing.

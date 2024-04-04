@@ -2,7 +2,7 @@ import pytest
 from fastapi import UploadFile
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
-load_dotenv('/home/menelikberhan/REST-API_for_Ethiopic_Script_OCR/a/test_env')
+load_dotenv('/home/menelikberhan/REST-API_for_Ethiopic_Script_OCR/tests/test_env')
 # from api.v1.app import app
 from io import BytesIO
 from pymongo import MongoClient

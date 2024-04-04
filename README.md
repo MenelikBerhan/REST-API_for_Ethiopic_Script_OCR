@@ -15,7 +15,7 @@ A RESTfull Web API service to Menelik's Berhan Ethiopic Script OCR app.
 6. [Usage](#usage)
 7. [Testing](#testing)
 8. [Contributing](#contributing) 
-9. [Contributors](#contributors) 
+9. [Authors](#authors) 
 10. [License](#license)
 
 ## Introduction
@@ -32,11 +32,19 @@ Concepts learned from previous implementation of [Ethiopic Script CLI OCR app][1
 
 ## Features
 
-- Feature 1
-- Feature 2
-- Feature 3
+- **OCR on Images and PDFs**: Perform OCR on images and PDFs containing Ethiopic script text.
+- **OCR Process Tracking**: Each OCR process (for image or PDF) is tracked and stored in a database for future analysis.
+- **Flexible OCR Outputs**: OCR results can be provided in various formats including plain text, Microsoft Word, and PDF.
+- **OCR Result Accuracy**: Provides an accuracy score for OCR results based on the average confidence level of words recognized.
+- **Configurable OCR Process**: Users can configure the OCR process by adjusting Tesseract configuration options.
+- **Image Preprocessing**: Includes image preprocessing capabilities to improve OCR results.
+- **File Storage and Metadata**: Uploaded OCR input image and PDF files are stored locally, with file metadata stored in a database using class abstractions.
+- **Fine-Tuned Language Model**: In addition to the default [Tesseract language models][2], includes a fine-tuned model for Amharic, based on texts printed in the 1950s.
+- **Data Abstraction for Analysis**: Abstracts input images & PDFs, Tesseract configuration used for OCR, and the OCR process & result using classes, and stores these data in the database for future analysis.
+- **OAuth2 User Authentication**: Secure user authentication implemented using FastAPI securities (JWT).
 
 ## Technologies Used
+
 - [Python](https://www.python.org/) (3.8): The whole app is built with Python.
 - [FastApi](https://fastapi.tiangolo.com/) (0.110.0): This is the web framework used.
 - [Uvicorn](https://www.uvicorn.org/) (0.29.0): An ASGI web server implementation for Python.
@@ -156,16 +164,17 @@ to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
 
-## Contributors
+## Authors
 
 ### Girma Eshete aka Menelik Berhan
 [Linkedin](https://www.linkedin.com/in/menelikberhan)
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+[MIT](/LICENSE)
 
 [^1]: To avoid: PIL.Image.DecompressionBombError: Image size (... pixels) exceeds limit of 178956970 pixels, could be decompression bomb DOS attack.
 
 [^2]: All language models, except `amh-old`, are from tesseract best language models. `amh-old` is a fine tuned `amh` model using training datas from old amharic printed documents (mostly around the 1950's).
 
 [1]: https://github.com/MenelikBerhan/amharic_ocr_draft
+[2]: https://github.com/tesseract-ocr/tessdata_best

@@ -21,7 +21,9 @@ users_router = APIRouter(prefix='/user')
     response_model=UserInResponse,
     tags=['authentication'],
     status_code=status.HTTP_201_CREATED,
-    response_description='__Created User__'
+    response_description='__Created User__',
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
 )
 async def register_user(
         user: UserInCreate = Body(...)
@@ -83,10 +85,12 @@ async def login_user(
 
 
 @users_router.get(
-        '/me/',
-        response_model=UserInResponse,
-        tags=['authentication'],
-        response_description='__Current User__'
+    '/me/',
+    response_model=UserInResponse,
+    tags=['authentication'],
+    response_description='__Current User__',
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
 )
 async def get_current_user(
     current_user: Annotated[User, Depends(get_current_active_user)],

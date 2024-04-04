@@ -1,0 +1,42 @@
+# env file
+
+# name of app
+APP_TITLE=REST-API for Ethiopic Script OCR
+# summary of app
+APP_SUMMARY=An OCR app for Images & PDFs containing Ethiopic Script
+# brief description of app
+APP_DESCRIPTION=
+# app debug mode
+APP_DEBUG_MODE=True
+# no. of workers for OCR using pytesseract
+OCR_WORKERS=4
+
+# database name
+DB_NAME=test_db
+# database connection host
+DB_HOST=localhost
+# database connection port
+DB_PORT=27017
+
+# uvicorn reload
+SERVER_RELOAD=True
+# uvicorn host
+SERVER_HOST=localhost
+# uvicorn port
+SERVER_PORT=8000
+
+# path to local storage directory
+STORAGE_PATH=/tmp/ocr_app/
+
+# path to tesseract trained data directory
+TESSDATA_PREFIX=../ocr/trained_data/fine_tuned
+
+# access token expiration time in minutes
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# The key to use for signing the claim set by jwt
+# use `openssl rand -hex 32` to generate key
+AUTH_SECRET_KEY=1f28b3ecee6544313032ddaec09be053a1cc68681b9f50ae5427ff7f972491fa
+
+# The algorithm to use for signing the the claims by jwt
+AUTH_ALGORITHM=HS256

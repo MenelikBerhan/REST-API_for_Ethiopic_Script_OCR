@@ -13,7 +13,7 @@ async def get_image_by_id(image_id: str) -> dict:
         image = await db_client.db.images.find_one({'_id': ObjectId(image_id)})
     except InvalidId:   # handle invalid ObjectId string
         raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
             f"""InvalidId: '{image_id}' is not a valid ObjectId, it must be \
 a 12-byte input or a 24-character hex string""")
 
@@ -32,7 +32,7 @@ async def get_pdf_by_id(pdf_id: str) -> dict:
         pdf = await db_client.db.pdfs.find_one({'_id': ObjectId(pdf_id)})
     except InvalidId:   # handle invalid ObjectId string
         raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
             f"""InvalidId: '{pdf_id}' is not a valid ObjectId, it must be \
 a 12-byte input or a 24-character hex string""")
 

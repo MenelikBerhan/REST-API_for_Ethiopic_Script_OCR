@@ -27,7 +27,7 @@ ocr_router = APIRouter(prefix='/ocr')
 )
 async def get_image_ocr_output_file_formats(
     image_id: str,
-    current_user: Annotated[User, Depends(get_current_active_user)]
+    # current_user: Annotated[User, Depends(get_current_active_user)]
 ) -> List[OcrOutputFormat]:
     """
     ### List of file formats the OCR result is already saved in.<br>\
@@ -76,7 +76,7 @@ async def get_pdf_ocr_output_file_formats(
 )
 async def get_image_ocr_result(
     image_id: str,
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    # current_user: Annotated[User, Depends(get_current_active_user)],
     format: OcrOutputFormat = Query(
         default='str',
         description="__File format of image's OCR result__"

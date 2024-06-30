@@ -108,6 +108,11 @@ sudo systemctl start mongod
 sudo systemctl enable mongod
 ```
 
+#### [Install poppler](https://poppler.freedesktop.org/) for [pdf2image](https://pdf2image.readthedocs.io/en/latest/installation.html)
+```bash
+sudo apt-get -y install poppler-utils
+```
+
 #### Clone the repo
 ```bash
 git clone https://github.com/MenelikBerhan/REST-API_for_Ethiopic_Script_OCR.git
@@ -133,9 +138,16 @@ python3 -m pip install -r requirements.txt
 Change default app variables by setting values in [app_env](/config/app_env) file.
 
 #### Start the app:
+- Directly using uvicorn
 ```bash
 python -m api.v1.app
 ```
+
+- Using gunicorn
+```bash
+gunicorn api.v1.app:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 api.v1.app:app
+```
+####
 
 ## [Endpoints](/ENDPOINTS.md)
 

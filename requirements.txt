@@ -15,6 +15,7 @@ exceptiongroup==1.2.0
 fastapi==0.110.0
 fonttools==4.50.0
 fpdf2==2.7.8
+gunicorn==22.0.0
 h11==0.14.0
 idna==3.6
 lxml==5.2.0

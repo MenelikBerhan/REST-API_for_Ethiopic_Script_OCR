@@ -49,6 +49,7 @@ async def background_write_file_image(file_buffer: bytes, file_name: str)\
     # remove unnecessary info that causes errors for large png files
     info = deepcopy(image.info)
     info.pop('icc_profile', None)
+    info.pop('exif', None)      # serialize it before use if needed
 
     # get image metadata and update image in db with it
     image_dict = {

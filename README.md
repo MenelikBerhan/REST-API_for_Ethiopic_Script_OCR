@@ -145,7 +145,7 @@ python -m api.v1.app
 
 - Using gunicorn
 ```bash
-gunicorn api.v1.app:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 api.v1.app:app
+gunicorn --workers 4 --worker-class uvicorn.workers.UvicornWorker api.v1.app:app
 ```
 ####
 

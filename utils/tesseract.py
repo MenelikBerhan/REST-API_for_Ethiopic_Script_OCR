@@ -153,6 +153,9 @@ async def background_run_tesseract_image(
         # set start benchmark time
         start = time.perf_counter()
 
+        # set tesseract path (Reason: error when running app using gunicorn)
+        pts.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+    
         ocr_result_dict = await loop.run_in_executor(
             pool,
             lambda: pts.image_to_data(
@@ -242,6 +245,9 @@ async def background_run_tesseract_pdf(
 
             # set start benchmark time
             start = time.perf_counter()
+
+            # set tesseract path (Reason: error when running app using gunicorn)
+            pts.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
             ocr_result_dict = await loop.run_in_executor(
                 pool,

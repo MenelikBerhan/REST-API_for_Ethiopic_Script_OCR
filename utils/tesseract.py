@@ -1,15 +1,17 @@
 """Utilities for tesseract tesseract related operations
 """
 import asyncio
-import pytesseract as pts
-from db.mongodb import db_client
+import time
 from concurrent.futures import ThreadPoolExecutor
+from typing import List, Tuple
+
+import pytesseract as pts
+from PIL.Image import Image
+
 from config.setup import settings
+from db.mongodb import db_client
 from models.tesseract import TesseractConfigModel, TesseractOutputModelImage,\
     TesseractOutputModelPdf
-from PIL.Image import Image
-from typing import List, Tuple
-import time
 
 
 def parse_ocr_result(result_dict: dict) -> Tuple[str, float]:

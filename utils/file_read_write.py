@@ -1,16 +1,20 @@
 """Utilities for file reading & writing operations
 """
-from config.setup import settings
+import io
 from copy import deepcopy
-from docx import Document
-from fpdf import FPDF
 from os import path, makedirs
-from pdf2image import pdfinfo_from_bytes, convert_from_bytes
-from PIL import Image
 from typing import List, Tuple
 from uuid import uuid4
+
 import aiofiles
-import io
+from docx import Document
+from fpdf import FPDF
+from pdf2image import pdfinfo_from_bytes, convert_from_bytes
+from PIL import Image
+from PIL.TiffImagePlugin import IFDRational
+
+from config.setup import settings
+
 
 
 async def background_write_file_image(file_buffer: bytes, file_name: str)\
@@ -46,10 +50,14 @@ async def background_write_file_image(file_buffer: bytes, file_name: str)\
     # load image from bytes buffer using Pillow & BytesIO
     image = Image.open(io.BytesIO(file_buffer))
 
-    # remove unnecessary info that causes errors for large png files
     info = deepcopy(image.info)
-    info.pop('icc_profile', None)
-    info.pop('exif', None)      # serialize it before use if needed
+    # remove unnecessary info (icc_profile & exif) 
+    info.pop('icc_profile', None)   # causes serialization error for db
+    info.pop('exif', None)          # not needed (large size)
+
+    # if dpi is encoded using IFDRational, convert to list of tuples
+    if type(info['dpi'][0] == IFDRational):
+        info['dpi'] = [(i._numerator, i._denominator) for i in info['dpi']]
 
     # get image metadata and update image in db with it
     image_dict = {

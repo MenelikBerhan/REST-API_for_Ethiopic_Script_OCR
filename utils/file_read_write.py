@@ -18,7 +18,7 @@ from config.setup import settings
 
 
 async def background_write_file_image(file_buffer: bytes, file_name: str)\
-        -> Tuple[Image.Image, dict]:
+        -> dict:
     """
     Retrieves image metadata from image buffer and saves image to local
     storage.
@@ -47,7 +47,8 @@ async def background_write_file_image(file_buffer: bytes, file_name: str)\
     # set absolute local storage path by appending file name to storage path
     file_path = path.join(path.abspath(storage_path), local_file_name)
 
-    # load image from bytes buffer using Pillow & BytesIO
+    # load image from bytes buffer using Pillow & BytesIO to get metadata
+    # TODO: use opencv (used in background_run_tesseract_image())
     image = Image.open(io.BytesIO(file_buffer))
 
     info = deepcopy(image.info)
@@ -58,6 +59,9 @@ async def background_write_file_image(file_buffer: bytes, file_name: str)\
     # if dpi is encoded using IFDRational, convert to list of tuples
     if (type(info['dpi'][0]) == IFDRational):
         info['dpi'] = [(i._numerator, i._denominator) for i in info['dpi']]
+
+    # close Image (file buffer will be used to load image by CV2)
+    image.close()
 
     # get image metadata and update image in db with it
     image_dict = {
@@ -72,7 +76,7 @@ async def background_write_file_image(file_buffer: bytes, file_name: str)\
     async with aiofiles.open(file_path, 'wb') as new_image_file:
         await new_image_file.write(file_buffer)
 
-    return image, image_dict
+    return image_dict
 
 
 async def background_write_file_pdf(file_buffer: bytes, file_name: str)\

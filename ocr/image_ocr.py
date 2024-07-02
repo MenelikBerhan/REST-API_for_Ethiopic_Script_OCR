@@ -25,14 +25,14 @@ async def background_image_ocr(
     print('Tesseract: CONFIGURED')
 
     # save image in local storage & get image_dict (metadata & storage path)
-    image, image_update_dict = await background_write_file_image(
+    image_update_dict = await background_write_file_image(
         file_buffer, image_dict['name']
     )
     print('Image: WRITTEN 2 LOCAL')
 
     # run tesseract in background & get output model dict & result text
     tess_output_dict = await background_run_tesseract_image(
-        image, image_dict['id'], tess_config_dict
+        file_buffer, image_dict['id'], tess_config_dict
     )
     print('Tesseract: OCR FINISHED')
 

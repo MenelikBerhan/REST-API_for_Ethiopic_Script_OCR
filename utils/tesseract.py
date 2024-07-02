@@ -5,7 +5,10 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Tuple
 
+import cv2
+import numpy as np
 import pytesseract as pts
+from PIL import ExifTags, ImageOps
 from PIL.Image import Image
 
 from config.setup import settings
@@ -111,7 +114,7 @@ OCR_IN_PROGRESS: int = 0
 
 
 async def background_run_tesseract_image(
-    image: Image, image_id: str, tess_config_dict: dict
+    file_buffer: bytes, image_id: str, tess_config_dict: dict
 ):
     """
     Runs tesseract in a ThreadPool and returns the result.
@@ -138,6 +141,17 @@ async def background_run_tesseract_image(
     for key, value in tess_config_dict['config_vars'].items():
         config += ' -c {}={}'.format(key, value)
 
+    # # using a PIL.Image (lower accuracy than using buffer directly ???)
+    # ImageOps.exif_transpose(image, in_place=True)
+    # cv2_image =  np.array(image.convert('RGB'))
+
+    # load image from buffer using cv2 & numpy
+    cv2_image = cv2.imdecode(np.frombuffer(file_buffer, np.uint8), 1)
+
+    # convert image to grayscale (black & white)
+    gray_image = cv2.cvtColor(cv2_image, cv2.COLOR_RGB2GRAY)
+    # cv2.imwrite(f"/home/menelikberhan/REST-API_for_Ethiopic_Script_OCR/gray-{image_id}.jpg", gray_image)
+
     # get the running event loop in the current OS thread
     # [REFERENCE](https://docs.python.org/3.8/library/asyncio-eventloop.html#asyncio.loop.run_in_executor)  # noqa
     loop = asyncio.get_running_loop()
@@ -161,14 +175,12 @@ async def background_run_tesseract_image(
         ocr_result_dict = await loop.run_in_executor(
             pool,
             lambda: pts.image_to_data(
-                image, config=config, output_type=pts.Output.DICT
+                gray_image, config=config, output_type=pts.Output.DICT
             )
         )
 
         # set time taken (TODO: use other counters & check d/ce)
         time_taken = time.perf_counter() - start
-
-        image.close()   # as precaution (side effect not clear if not closed)
 
         OCR_IN_PROGRESS = OCR_IN_PROGRESS - 1
 

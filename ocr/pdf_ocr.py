@@ -28,7 +28,7 @@ async def background_pdf_ocr(
     pdf_images, pdf_update_dict = await background_write_file_pdf(
         file_buffer, pdf_dict['name']
     )
-    print('Image: WRITTEN 2 LOCAL')
+    print('PDF: WRITTEN 2 LOCAL')
 
     # run tesseract in background & get output model dict & result text
     tess_output_dict = await background_run_tesseract_pdf(

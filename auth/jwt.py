@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Union
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+from jose import jwt, JWTError, ExpiredSignatureError
 from models.token import TokenData
 from typing_extensions import Annotated
 from .utils import get_user
@@ -58,9 +58,13 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
-
+    
+    except ExpiredSignatureError: # token expired
+        raise HTTPException(status_code=403, detail="token has been expired")
+    
     except JWTError:    # verification failed
         raise credentials_exception
+    
 
     # get and return user from db based on decoded username
     user = await get_user(username=token_data.username)

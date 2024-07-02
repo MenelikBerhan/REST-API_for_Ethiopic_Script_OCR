@@ -57,7 +57,7 @@ async def background_write_file_image(file_buffer: bytes, file_name: str)\
     info.pop('exif', None)          # not needed (large size)
 
     # if dpi is encoded using IFDRational, convert to list of tuples
-    if (type(info['dpi'][0]) == IFDRational):
+    if ('dpi' in info and type(info['dpi'][0]) == IFDRational):
         info['dpi'] = [(i._numerator, i._denominator) for i in info['dpi']]
 
     # close Image (file buffer will be used to load image by CV2)

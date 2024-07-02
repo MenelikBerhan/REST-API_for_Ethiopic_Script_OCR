@@ -56,7 +56,7 @@ async def background_write_file_image(file_buffer: bytes, file_name: str)\
     info.pop('exif', None)          # not needed (large size)
 
     # if dpi is encoded using IFDRational, convert to list of tuples
-    if type(info['dpi'][0] == IFDRational):
+    if (type(info['dpi'][0]) == IFDRational):
         info['dpi'] = [(i._numerator, i._denominator) for i in info['dpi']]
 
     # get image metadata and update image in db with it
@@ -117,7 +117,7 @@ async def background_write_file_pdf(file_buffer: bytes, file_name: str)\
     }
 
     # load pdf pages as PIL.Image objects
-    pdf_images = convert_from_bytes(file_buffer, fmt='jpeg')
+    pdf_images = convert_from_bytes(file_buffer, dpi=300, fmt='jpeg')
 
     # save pdf to local storage asynchronously and return pdf_images & dict
     async with aiofiles.open(file_path, 'wb') as new_pdf_file:

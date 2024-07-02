@@ -49,7 +49,7 @@ async def list_images(
 )
 async def create_image(
     background_tasks: BackgroundTasks,
-    # current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_current_active_user)],
     image_properties: ImagePostRequestModel = Body(default=None),
     tesseract_config: TesseractConfigRequestModel = Body(default=None),
     file: UploadFile = File(
